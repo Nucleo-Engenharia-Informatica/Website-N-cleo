@@ -1,26 +1,19 @@
 import { defineConfig } from 'vite';
-import path from 'path';
-
-const resolve = (p) => path.resolve(__dirname, p);
 
 export default defineConfig({
-    // 1. Corrige o caminho base para compatibilidade Vercel/caminhos relativos
+    // 1. Caminho base para garantir que os links compilados são relativos
     base: './', 
 
-    // 2. Remove o 'root' (ou comenta-o) para que o Vite use a raiz do repositório
-    // Remova a linha "root: 'public',"
-
-    // ... (o resto do código fica igual)
-
     build: {
-        // 3. outDir agora é 'dist' dentro da raiz do projeto (sem '../')
-        outDir: 'dist', 
+        // 2. outDir: 'dist' (Corrigido)
+        outDir: 'dist',
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                index: resolve('public/index.html'), 
-                eventos: resolve('public/eventos.html'),
-                parceiros: resolve('public/parceiros.html')
+                // 3. Caminhos absolutos/simples para o ponto de entrada HTML
+                index: 'public/index.html',
+                eventos: 'public/eventos.html',
+                parceiros: 'public/parceiros.html'
             }
         }
     }
