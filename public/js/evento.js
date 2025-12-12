@@ -73,12 +73,14 @@ function renderDetail(ev) {
   const h2 = document.createElement('h2'); h2.className = 'section-title'; h2.textContent = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title;
   const meta = document.createElement('div'); meta.className = 'news-meta'; meta.textContent = getMeta(ev);
 
-  let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i);
+  /* let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i);
   const baseName = (ev.cover || '').replace(/\.(jpg|jpeg|png)$/i, '');
   for (let n = 1; n <= 6; n++) {
     ['jpg','jpeg','png'].forEach(ext => { allImgs.push(`${baseName}_${n}.${ext}`); });
   }
-  allImgs = allImgs.filter((v, i, a) => a.indexOf(v) === i);
+  allImgs = allImgs.filter((v, i, a) => a.indexOf(v) === i); */
+
+  let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i && v);
   const mainImg = document.createElement('img'); mainImg.className = 'event-main'; mainImg.src = allImgs[0]; mainImg.alt = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title; mainImg.loading = 'lazy';
   mainImg.onerror = () => { const s = mainImg.src; if (s.endsWith('.jpg')) mainImg.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) mainImg.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) mainImg.src = s.replace('.png', '.jpg'); };
   wrap.appendChild(mainImg);
