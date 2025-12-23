@@ -1,27 +1,21 @@
 // api/pedidos.js
-
 import { neon } from '@neondatabase/serverless';
 
-// Usa a mesma variável de ambiente DATABASE_URL que já configurou
 const sql = neon(process.env.DATABASE_URL);
 
-// Exportar o handler para a Serverless Function
 module.exports = async (req, res) => {
-  // Apenas aceitar pedidos GET para ler os dados
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Método não permitido.' });
   }
 
   try {
-    // 1. Executar a query SQL para buscar todos os pedidos.
-    // ORDER BY data_envio DESC: mostra os mais recentes primeiro
+    // Adicionada a coluna 'resposta' na query SQL
     const pedidos = await sql`
-      SELECT id, texto, data_envio
+      SELECT id, texto, data_envio, resposta
       FROM pedidos_ajuda
       ORDER BY data_envio DESC;
     `;
 
-    // 2. Resposta de sucesso com os dados
     res.status(200).json(pedidos);
 
   } catch (error) {
