@@ -1,8 +1,36 @@
 import { parceiros } from './parceiros.js';
 
 const i18n = {
-  pt: { 'nav.quem': 'Quem somos', 'nav.fazemos': 'O que fazemos', 'nav.noticias': 'Notícias', 'nav.contactos': 'Contacte-nos', 'page.parceiros.title': 'Parceiros', 'page.parceiros.subtitle': 'Colaborações e apoio à comunidade.', 'page.parceiros.others': 'Outros parceiros', 'parceiro.meta': 'Parceiro', 'parceiro.view': 'Ver', 'parceiro.active': 'Em parceria ativa', 'parceiro.back': 'Voltar aos contactos' },
-  en: { 'nav.quem': 'Who we are', 'nav.fazemos': 'What we do', 'nav.noticias': 'News', 'nav.contactos': 'Contact us', 'page.parceiros.title': 'Partners', 'page.parceiros.subtitle': 'Collaborations and community support.', 'page.parceiros.others': 'Other partners', 'parceiro.meta': 'Partner', 'parceiro.view': 'View', 'parceiro.active': 'Active partnership', 'parceiro.back': 'Back to contacts' }
+  pt: {
+    'nav.quem': 'Quem Somos',
+    'nav.fazemos': 'O que Fazemos',
+    'nav.sobre': 'Sobre o Curso',
+    'nav.noticias': 'Notícias e Eventos',
+    'nav.contactos': 'Contactos',
+    'page.parceiros.hero': 'Parceiros e Colaboradores',
+    'page.parceiros.title': 'Empresas Parceiras',
+    'page.parceiros.subtitle': 'Colaborações que fortalecem a ligação entre a academia e o mercado de trabalho.',
+    'page.parceiros.others': 'Outros Parceiros',
+    'parceiro.meta': 'Parceiro',
+    'parceiro.view': 'Ver Detalhes',
+    'parceiro.active': 'Em parceria activa',
+    'parceiro.back': 'Voltar aos contactos'
+  },
+  en: {
+    'nav.quem': 'Who We Are',
+    'nav.fazemos': 'What We Do',
+    'nav.sobre': 'About the Course',
+    'nav.noticias': 'News & Events',
+    'nav.contactos': 'Contact',
+    'page.parceiros.hero': 'Partners and Collaborators',
+    'page.parceiros.title': 'Partner Companies',
+    'page.parceiros.subtitle': 'Collaborations that strengthen the connection between academia and the job market.',
+    'page.parceiros.others': 'Other Partners',
+    'parceiro.meta': 'Partner',
+    'parceiro.view': 'View Details',
+    'parceiro.active': 'Active partnership',
+    'parceiro.back': 'Back to contacts'
+  }
 };
 function getLang() { return localStorage.getItem('lang') || 'pt'; }
 function t(k) { const lang = getLang(); return (i18n[lang] && i18n[lang][k]) || (i18n.pt[k] || k); }
@@ -15,6 +43,21 @@ menuToggle.addEventListener('click', () => {
   const open = siteNav.classList.toggle('open');
   menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
+
+// Dark Mode Toggle
+function initThemeToggle() {
+  const themeToggle = document.getElementById('theme-toggle');
+  if (!themeToggle) return;
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+}
+initThemeToggle();
 
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
@@ -39,6 +82,15 @@ function renderLista(list, selectedId) {
     actions.appendChild(btn);
     body.appendChild(h3); body.appendChild(meta); body.appendChild(desc); body.appendChild(actions);
     card.appendChild(img); card.appendChild(body);
+
+    // Make the whole card clickable
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking on the button itself
+      if (e.target.tagName === 'A' || e.target.closest('a')) return;
+      btn.click();
+    });
+
     root.appendChild(card);
     observer.observe(card);
   });
@@ -60,6 +112,18 @@ function renderDetalhe(p) {
   body.appendChild(h2); body.appendChild(meta); body.appendChild(desc); body.appendChild(actions);
   wrap.appendChild(img); wrap.appendChild(body);
   root.appendChild(wrap);
+
+  // Click outside to go back
+  setTimeout(() => {
+    const clickOutsideHandler = (e) => {
+      if (!wrap.contains(e.target)) {
+        back.click();
+      }
+    };
+    document.addEventListener('click', clickOutsideHandler);
+    // Store handler to remove later if needed
+    wrap._clickOutsideHandler = clickOutsideHandler;
+  }, 100);
 }
 
 function getIdFromQuery() { return new URLSearchParams(window.location.search).get('id'); }
@@ -93,13 +157,18 @@ function initBackground() {
   }));
   function step() {
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.body.classList.contains('dark-mode');
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       n.x += n.vx; n.y += n.vy;
       if (n.x < -50 || n.x > w + 50) n.vx *= -1;
       if (n.y < -50 || n.y > h + 50) n.vy *= -1;
       ctx.beginPath();
-      ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      if (isDark) {
+        ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      } else {
+        ctx.fillStyle = `hsla(${n.hue}, 70%, 35%, 0.6)`;
+      }
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -109,7 +178,11 @@ function initBackground() {
         const dx = a.x - b.x, dy = a.y - b.y; const dist = Math.hypot(dx, dy);
         if (dist < 140) {
           const alpha = 0.10 + (140 - dist) / 140 * 0.20;
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          if (isDark) {
+            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          } else {
+            ctx.strokeStyle = `rgba(0,0,0,${alpha * 0.5})`;
+          }
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
       }

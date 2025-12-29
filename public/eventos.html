@@ -19,10 +19,19 @@
         </button>
         <nav class="site-nav" aria-label="Principal">
           <ul>
-            <li><a href="/quem.html" data-i18n="nav.quem">Quem somos</a></li>
-            <li><a href="/index.html#fazemos" data-i18n="nav.fazemos">O que fazemos</a></li>
-            <li><a href="/index.html#noticias" data-i18n="nav.noticias">Notícias</a></li>
-            <li><a href="/index.html#contactos" class="cta" data-i18n="nav.contactos">Contacte-nos</a></li>
+            <li><a href="/quem.html" data-i18n="nav.quem">Quem Somos</a></li>
+            <li><a href="/index.html#fazemos" data-i18n="nav.fazemos">O que Fazemos</a></li>
+            <li><a href="/index.html#sobre" data-i18n="nav.sobre">Sobre o Curso</a></li>
+            <li><a href="/index.html#noticias" data-i18n="nav.noticias">Notícias e Eventos</a></li>
+            <li><a href="/index.html#contactos" class="cta" data-i18n="nav.contactos">Contactos</a></li>
+            <li><button id="theme-toggle" class="btn small icon-btn" aria-label="Toggle dark mode">
+              <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button></li>
             <li><button id="lang-toggle" class="btn small">PT/EN</button></li>
           </ul>
         </nav>
@@ -30,19 +39,22 @@
     </header>
 
     <main>
-      <section class="section">
+      <section class="section" style="padding-top: 100px;">
         <div class="container">
-          <h2 class="section-title reveal-on-scroll" data-i18n="page.evento.title">Evento</h2>
           <div id="evento-detalhe" class="evento-detail reveal-on-scroll"></div>
-          <h3 class="section-title" data-i18n="page.evento.others">Outros eventos</h3>
-          <div class="news-list" id="eventos-lista"></div>
+
+          <div style="margin-top: 60px;">
+            <h3 class="section-title reveal-on-scroll" data-i18n="page.evento.others">Outros Eventos</h3>
+            <p class="section-subtitle reveal-on-scroll" data-i18n="page.evento.others.subtitle">Descubra mais atividades e iniciativas do núcleo.</p>
+            <div class="news-list" id="eventos-lista"></div>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="container">
-        <p>© Núcleo de Engenharia Informática</p>
+        <p>© 2025 Núcleo de Engenharia Informática — Universidade Fernando Pessoa</p>
       </div>
     </footer>
 

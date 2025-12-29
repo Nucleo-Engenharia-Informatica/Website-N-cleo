@@ -19,11 +19,19 @@
         </button>
         <nav class="site-nav" aria-label="Principal">
           <ul>
-            <li><a href="/quem.html" data-i18n="nav.quem">Quem somos</a></li>
-            <li><a href="#fazemos" data-i18n="nav.fazemos">O que fazemos</a></li>
-            <li><a href="#sobre" data-i18n="nav.sobre">Sobre</a></li>
-            <li><a href="#noticias" data-i18n="nav.noticias">Notícias</a></li>
-            <li><a href="#contactos" class="cta" data-i18n="nav.contactos">Contacte-nos</a></li>
+            <li><a href="/quem.html" data-i18n="nav.quem">Quem Somos</a></li>
+            <li><a href="#fazemos" data-i18n="nav.fazemos">O que Fazemos</a></li>
+            <li><a href="#sobre" data-i18n="nav.sobre">Sobre o Curso</a></li>
+            <li><a href="#noticias" data-i18n="nav.noticias">Notícias e Eventos</a></li>
+            <li><a href="#contactos" class="cta" data-i18n="nav.contactos">Contactos</a></li>
+            <li><button id="theme-toggle" class="btn small icon-btn" aria-label="Toggle dark mode">
+              <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </button></li>
             <li><button id="lang-toggle" class="btn small">PT/EN</button></li>
           </ul>
         </nav>
@@ -31,7 +39,7 @@
     </header>
 
     <main id="top">
-      <section class="hero hero-atrio">
+      <section class="hero hero-team">
         <div class="container hero-center">
           <h1 class="hero-title" data-i18n="hero.title">Nucleo De Engenharia Informática da Universidade Fernando Pessoa</h1>
         </div>
@@ -71,24 +79,27 @@
 
       <section id="sobre" class="section">
         <div class="container">
-          <h2 class="section-title reveal-on-scroll" data-i18n="section.sobre.title">Sobre</h2>
+          <h2 class="section-title reveal-on-scroll" data-i18n="section.sobre.title">Sobre Engenharia Informática</h2>
           <p class="section-subtitle reveal-on-scroll" data-i18n="section.sobre.text">
-            
-            
-            A Engenharia Informática, ou Engenharia de Computadores, é um campo da engenharia dedicado ao projeto, desenvolvimento e manutenção de sistemas de hardware e software. É a área responsável pela criação de toda a tecnologia que nos rodeia, desde aplicações móveis e websites a sistemas de gestão empresarial, inteligência artificial e robótica, abrangendo conhecimentos de programação, bases de dados, redes de comunicação, algoritmos e arquitetura de computadores. O engenheiro informático é o profissional que transforma ideias complexas em soluções tecnológicas funcionais.
+            A Engenharia Informática é a área que concebe, desenvolve e mantém os sistemas tecnológicos que transformam o mundo. Na UFP, o curso destaca-se pela forte componente prática, projectos reais com empresas parceiras e preparação sólida para os desafios do mercado.
 
-            O curso de Engenharia Informática oferece vantagens significativas no mercado de trabalho atual. Uma das principais é a elevada empregabilidade, sendo uma das áreas com maior taxa de emprego e mais resiliente a crises, com uma procura constante por profissionais qualificados. Adicionalmente, os salários são geralmente competitivos devido à alta procura e à especialização técnica.
-
-            A diversidade de carreiras é outro ponto forte, pois a formação permite a especialização em áreas como Cibersegurança, Desenvolvimento de Jogos, Cloud Computing, Data Science ou Inteligência Artificial. Por ser uma profissão moderna, oferece muitas vezes a possibilidade de trabalho remoto e flexibilidade de horários, facilitando o equilíbrio entre a vida pessoal e profissional. Por fim, as competências adquiridas são universais, permitindo uma carreira global e a oportunidade de trabalhar continuamente com tecnologias de ponta e participar ativamente na inovação.
+            Com uma taxa de empregabilidade de 95%, os nossos diplomados integram-se rapidamente em carreiras estimulantes nas áreas de Data Science, Cloud Computing, DevOps, Cibersegurança, Inteligência Artificial e muito mais.
           </p>
-          <div class="grid stats-grid">
+
+          <div class="reveal-on-scroll" style="text-align: center; margin-top: 24px;">
+            <a href="https://informatica.ufp.pt/" target="_blank" rel="noopener" class="btn primary" data-i18n="section.sobre.link">
+              Saber Mais Sobre o Curso
+            </a>
+          </div>
+
+          <div class="grid stats-grid" style="margin-top: 48px;">
             <article class="stat-card reveal-on-scroll">
               <div class="stat-value"><span class="counter" data-target="95" data-suffix="%">0%</span></div>
-              <div class="stat-label" data-i18n="stats.empregabilidade">Taxa de empregabilidade</div>
+              <div class="stat-label" data-i18n="stats.empregabilidade">Taxa de Empregabilidade</div>
             </article>
             <article class="stat-card reveal-on-scroll">
               <div class="stat-value"><span class="counter" data-target="20" data-suffix="+">0+</span></div>
-              <div class="stat-label" data-i18n="stats.parceiros">Empresas parceiras</div>
+              <div class="stat-label" data-i18n="stats.parceiros">Empresas Parceiras</div>
             </article>
           </div>
         </div>
@@ -109,10 +120,10 @@
       <section id="contactos" class="section alt">
         <div class="container">
           <div class="help-block reveal-on-scroll">
-            <h3 class="section-title" data-i18n="help.title">Ajuda para a comunidade</h3>
-            <p class="section-subtitle" data-i18n="help.desc">Necessita de alguma ajuda ou orientação relativo á area de informatica,fale conosco</p>
+            <h3 class="section-title" data-i18n="help.title">Apoio à Comunidade Tecnológica</h3>
+            <p class="section-subtitle" data-i18n="help.desc">Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.</p>
             <form id="ajuda-form" class="ajuda-form">
-              <textarea id="ajuda-texto" name="ajuda-texto" placeholder="Escreva a sua necessidade (ex: necessito de comprar um computador até 600 euros que computador recomendam, necessito de um site sobre dentistas)" required></textarea>
+              <textarea id="ajuda-texto" name="ajuda-texto" placeholder="Descreva a sua necessidade (ex: preciso de ajuda para escolher um computador até 600€, gostaria de desenvolver um website para o meu negócio, preciso de orientação sobre cibersegurança)" required></textarea>
               <button type="submit" class="btn primary" data-i18n="help.submit">Enviar pedido</button>
             </form>
           </div>
@@ -161,7 +172,7 @@
 
     <footer class="site-footer">
       <div class="container">
-        <p>© Núcleo de Engenharia Informática</p>
+        <p>© 2025 Núcleo de Engenharia Informática — Universidade Fernando Pessoa</p>
       </div>
     </footer>
 

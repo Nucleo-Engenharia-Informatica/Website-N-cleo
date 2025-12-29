@@ -1,8 +1,32 @@
 import { events } from './events.js';
 
 const i18n = {
-  pt: { 'nav.quem': 'Quem somos', 'nav.fazemos': 'O que fazemos', 'nav.noticias': 'Notícias', 'nav.contactos': 'Contacte-nos', 'page.evento.title': 'Evento', 'page.evento.others': 'Outros eventos', 'evento.back': 'Voltar às notícias', 'label.tba': 'Sem data anunciada', 'label.upcoming': 'Brevemente' },
-  en: { 'nav.quem': 'Who we are', 'nav.fazemos': 'What we do', 'nav.noticias': 'News', 'nav.contactos': 'Contact us', 'page.evento.title': 'Event', 'page.evento.others': 'Other events', 'evento.back': 'Back to news', 'label.tba': 'Date to be announced', 'label.upcoming': 'Upcoming' }
+  pt: {
+    'nav.quem': 'Quem Somos',
+    'nav.fazemos': 'O que Fazemos',
+    'nav.sobre': 'Sobre o Curso',
+    'nav.noticias': 'Notícias e Eventos',
+    'nav.contactos': 'Contactos',
+    'page.evento.title': 'Evento',
+    'page.evento.others': 'Outros Eventos',
+    'page.evento.others.subtitle': 'Descubra mais atividades e iniciativas do núcleo.',
+    'evento.back': 'Voltar às notícias',
+    'label.tba': 'Data a Anunciar',
+    'label.upcoming': 'Próximamente'
+  },
+  en: {
+    'nav.quem': 'Who We Are',
+    'nav.fazemos': 'What We Do',
+    'nav.sobre': 'About the Course',
+    'nav.noticias': 'News & Events',
+    'nav.contactos': 'Contact',
+    'page.evento.title': 'Event',
+    'page.evento.others': 'Other Events',
+    'page.evento.others.subtitle': 'Discover more activities and initiatives from the nucleus.',
+    'evento.back': 'Back to news',
+    'label.tba': 'Date to be Announced',
+    'label.upcoming': 'Upcoming'
+  }
 };
 function getLang() { return localStorage.getItem('lang') || 'pt'; }
 function t(k) { const lang = getLang(); return (i18n[lang] && i18n[lang][k]) || (i18n.pt[k] || k); }
@@ -15,6 +39,21 @@ menuToggle.addEventListener('click', () => {
   const open = siteNav.classList.toggle('open');
   menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 });
+
+// Dark Mode Toggle
+function initThemeToggle() {
+  const themeToggle = document.getElementById('theme-toggle');
+  if (!themeToggle) return;
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+}
+initThemeToggle();
 
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
@@ -58,6 +97,15 @@ function renderAgenda(list, selectedId) {
     actions.appendChild(btn);
     body.appendChild(h3); body.appendChild(meta); body.appendChild(p); body.appendChild(actions);
     card.appendChild(img); card.appendChild(body);
+
+    // Make the whole card clickable
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking on the button itself
+      if (e.target.tagName === 'A' || e.target.closest('a')) return;
+      btn.click();
+    });
+
     root.appendChild(card);
     observer.observe(card);
   });
@@ -81,22 +129,101 @@ function renderDetail(ev) {
   allImgs = allImgs.filter((v, i, a) => a.indexOf(v) === i); */
 
   let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i && v);
+  let currentIdx = 0;
+
   const mainImg = document.createElement('img'); mainImg.className = 'event-main'; mainImg.src = allImgs[0]; mainImg.alt = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title; mainImg.loading = 'lazy';
   mainImg.onerror = () => { const s = mainImg.src; if (s.endsWith('.jpg')) mainImg.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) mainImg.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) mainImg.src = s.replace('.png', '.jpg'); };
   wrap.appendChild(mainImg);
 
   const thumbs = document.createElement('div'); thumbs.className = 'event-thumbs';
+
+  function updateMainImage(idx) {
+    currentIdx = idx;
+    mainImg.src = allImgs[idx];
+    Array.from(thumbs.children).forEach((c, i) => {
+      if (i === idx) c.classList.add('active');
+      else c.classList.remove('active');
+    });
+  }
+
   allImgs.forEach((src, idx) => {
     const t = document.createElement('img'); t.src = src; t.alt = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title; t.loading = 'lazy';
     t.onerror = () => { const s = t.src; if (s.endsWith('.jpg')) t.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) t.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) t.src = s.replace('.png', '.jpg'); };
     if (idx === 0) t.classList.add('active');
-    t.addEventListener('click', () => { mainImg.src = src; Array.from(thumbs.children).forEach(c => c.classList.remove('active')); t.classList.add('active'); });
+    t.addEventListener('click', () => updateMainImage(idx));
     thumbs.appendChild(t);
   });
 
-  const lb = document.createElement('div'); lb.className = 'lightbox'; const lbImg = document.createElement('img'); lb.appendChild(lbImg); document.body.appendChild(lb);
-  mainImg.addEventListener('click', () => { lbImg.src = mainImg.src; lb.classList.add('open'); });
-  lb.addEventListener('click', () => lb.classList.remove('open'));
+  // Auto-play carousel if more than 1 image
+  let carouselInterval = null;
+  if (allImgs.length > 1) {
+    carouselInterval = setInterval(() => {
+      const nextIdx = (currentIdx + 1) % allImgs.length;
+      updateMainImage(nextIdx);
+    }, 4000);
+
+    // Pause on hover
+    mainImg.addEventListener('mouseenter', () => clearInterval(carouselInterval));
+    mainImg.addEventListener('mouseleave', () => {
+      if (allImgs.length > 1) {
+        carouselInterval = setInterval(() => {
+          const nextIdx = (currentIdx + 1) % allImgs.length;
+          updateMainImage(nextIdx);
+        }, 4000);
+      }
+    });
+  }
+
+  // Lightbox with navigation
+  const lb = document.createElement('div'); lb.className = 'lightbox';
+  const lbImg = document.createElement('img');
+  const prevBtn = document.createElement('button'); prevBtn.className = 'lightbox-nav lightbox-prev'; prevBtn.innerHTML = '‹';
+  const nextBtn = document.createElement('button'); nextBtn.className = 'lightbox-nav lightbox-next'; nextBtn.innerHTML = '›';
+  const closeBtn = document.createElement('button'); closeBtn.className = 'lightbox-close'; closeBtn.innerHTML = '×';
+
+  lb.appendChild(lbImg);
+  lb.appendChild(prevBtn);
+  lb.appendChild(nextBtn);
+  lb.appendChild(closeBtn);
+  document.body.appendChild(lb);
+
+  let lbCurrentIdx = 0;
+
+  function openLightbox(idx) {
+    lbCurrentIdx = idx;
+    lbImg.src = allImgs[idx];
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function showPrevImage() {
+    lbCurrentIdx = (lbCurrentIdx - 1 + allImgs.length) % allImgs.length;
+    lbImg.src = allImgs[lbCurrentIdx];
+  }
+
+  function showNextImage() {
+    lbCurrentIdx = (lbCurrentIdx + 1) % allImgs.length;
+    lbImg.src = allImgs[lbCurrentIdx];
+  }
+
+  mainImg.addEventListener('click', () => openLightbox(currentIdx));
+  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
+  lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+  prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrevImage(); });
+  nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNextImage(); });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft') showPrevImage();
+    else if (e.key === 'ArrowRight') showNextImage();
+    else if (e.key === 'Escape') closeLightbox();
+  });
 
   body.appendChild(h2);
   body.appendChild(meta);
@@ -109,6 +236,19 @@ function renderDetail(ev) {
   body.appendChild(actions);
   wrap.appendChild(body);
   root.appendChild(wrap);
+
+  // Click outside to go back
+  setTimeout(() => {
+    const clickOutsideHandler = (e) => {
+      if (!wrap.contains(e.target) && !e.target.closest('.lightbox')) {
+        back.click();
+      }
+    };
+    document.addEventListener('click', clickOutsideHandler);
+    // Store handler to remove later if needed
+    wrap._clickOutsideHandler = clickOutsideHandler;
+  }, 100);
+
   applyLangToDom(); initLangToggle();
 }
 
@@ -142,13 +282,18 @@ function initBackground() {
   }));
   function step() {
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.body.classList.contains('dark-mode');
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       n.x += n.vx; n.y += n.vy;
       if (n.x < -50 || n.x > w + 50) n.vx *= -1;
       if (n.y < -50 || n.y > h + 50) n.vy *= -1;
       ctx.beginPath();
-      ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      if (isDark) {
+        ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      } else {
+        ctx.fillStyle = `hsla(${n.hue}, 70%, 35%, 0.6)`;
+      }
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -158,7 +303,11 @@ function initBackground() {
         const dx = a.x - b.x, dy = a.y - b.y; const dist = Math.hypot(dx, dy);
         if (dist < 140) {
           const alpha = 0.10 + (140 - dist) / 140 * 0.20;
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          if (isDark) {
+            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          } else {
+            ctx.strokeStyle = `rgba(0,0,0,${alpha * 0.5})`;
+          }
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
       }

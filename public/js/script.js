@@ -9,6 +9,25 @@ function toggleMenu() {
 menuToggle.addEventListener('click', toggleMenu);
 navLinks.forEach(a => a.addEventListener('click', () => siteNav.classList.remove('open')));
 
+// Dark Mode Toggle
+function initThemeToggle() {
+  const themeToggle = document.getElementById('theme-toggle');
+  if (!themeToggle) return;
+
+  // Default to dark mode
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+}
+
+initThemeToggle();
+
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) e.target.classList.add('reveal');
@@ -20,49 +39,50 @@ import { events } from './events.js';
 
 const i18n = {
   pt: {
-    'nav.quem': 'Quem somos',
-    'nav.fazemos': 'O que fazemos',
-    'nav.sobre': 'Sobre',
-    'nav.noticias': 'Notícias',
-    'nav.contactos': 'Contacte-nos',
-    'hero.title': 'Nucleo De Engenharia Informatica da Universidade Fernando Pessoa',
-    'section.fazemos.title': 'O que fazemos',
-    'section.fazemos.sub': 'Workshops, hackathons, talks e convívios académicos.',
-    'features.workshops.title': 'Workshops',
-    'features.workshops.desc': 'Aprendizagem prática em tecnologias atuais.',
+    'nav.quem': 'Quem Somos',
+    'nav.fazemos': 'O que Fazemos',
+    'nav.sobre': 'Sobre o Curso',
+    'nav.noticias': 'Notícias e Eventos',
+    'nav.contactos': 'Contactos',
+    'hero.title': 'Núcleo de Engenharia Informática da Universidade Fernando Pessoa',
+    'section.fazemos.title': 'O que Fazemos',
+    'section.fazemos.sub': 'Workshops práticos, hackathons desafiantes, talks inspiradoras e convívios que fortalecem a nossa comunidade.',
+    'features.workshops.title': 'Workshops Práticos',
+    'features.workshops.desc': 'Sessões hands-on com as tecnologias mais procuradas pelo mercado.',
     'features.hackathons.title': 'Hackathons',
-    'features.hackathons.desc': 'Desafios intensos para criar soluções.',
-    'features.talks.title': 'Talks',
-    'features.talks.desc': 'Oradores convidados e partilha de conhecimento.',
-    'features.comunidade.title': 'Comunidade',
-    'features.comunidade.desc': 'Atividades sociais e networking.',
-    'section.sobre.title': 'Sobre',
-    'section.sobre.text': 'A Engenharia Informática, ou Engenharia de Computadores, é um campo da engenharia dedicado ao projeto, desenvolvimento e manutenção de sistemas de hardware e software. É a área responsável pela criação de toda a tecnologia que nos rodeia, desde aplicações móveis e websites a sistemas de gestão empresarial, inteligência artificial e robótica, abrangendo conhecimentos de programação, bases de dados, redes de comunicação, algoritmos e arquitetura de computadores. O engenheiro informático é o profissional que transforma ideias complexas em soluções tecnológicas funcionais.\n\nO curso de Engenharia Informática oferece vantagens significativas no mercado de trabalho atual. Uma das principais é a elevada empregabilidade, sendo uma das áreas com maior taxa de emprego e mais resiliente a crises, com uma procura constante por profissionais qualificados. Adicionalmente, os salários são geralmente competitivos devido à alta procura e à especialização técnica.\n\nA diversidade de carreiras é outro ponto forte, pois a formação permite a especialização em áreas como Cibersegurança, Desenvolvimento de Jogos, Cloud Computing, Data Science ou Inteligência Artificial. Por ser uma profissão moderna, oferece muitas vezes a possibilidade de trabalho remoto e flexibilidade de horários, facilitando o equilíbrio entre a vida pessoal e profissional. Por fim, as competências adquiridas são universais, permitindo uma carreira global e a oportunidade de trabalhar continuamente com tecnologias de ponta e participar ativamente na inovação.',
-    'stats.empregabilidade': 'Taxa de empregabilidade',
-    'stats.parceiros': 'Empresas parceiras',
-    'section.noticias.title': 'Notícias',
-    'section.noticias.sub': 'Próximos eventos e novidades.',
-    'filter.all': 'Tudo',
-    'filter.past': 'Passados',
-    'help.title': 'Ajuda para a comunidade',
-    'help.desc': 'Necessita de alguma ajuda ou orientação relativo á área de informática, fale conosco',
-    'help.submit': 'Enviar pedido',
-    'help.sent': 'Pedido enviado',
-    'section.contactos.title': 'Contacte-nos',
-    'section.contactos.sub': 'Email, redes sociais e links úteis.',
+    'features.hackathons.desc': 'Desafios intensivos para desenvolver soluções inovadoras em equipa.',
+    'features.talks.title': 'Tech Talks',
+    'features.talks.desc': 'Oradores convidados da indústria partilham experiências e conhecimento.',
+    'features.comunidade.title': 'Comunidade Activa',
+    'features.comunidade.desc': 'Networking, eventos sociais e ligação ao ecossistema tecnológico.',
+    'section.sobre.title': 'Sobre Engenharia Informática',
+    'section.sobre.text': 'A Engenharia Informática é a área que concebe, desenvolve e mantém os sistemas tecnológicos que transformam o mundo. Na UFP, o curso destaca-se pela forte componente prática, projectos reais com empresas parceiras e preparação sólida para os desafios do mercado.\n\nCom uma taxa de empregabilidade de 95%, os nossos diplomados integram-se rapidamente em carreiras estimulantes nas áreas de Data Science, Cloud Computing, DevOps, Cibersegurança, Inteligência Artificial e muito mais.',
+    'section.sobre.link': 'Saber Mais Sobre o Curso',
+    'stats.empregabilidade': 'Taxa de Empregabilidade',
+    'stats.parceiros': 'Empresas Parceiras',
+    'section.noticias.title': 'Notícias e Eventos',
+    'section.noticias.sub': 'Mantém-te actualizado com as últimas novidades e próximos eventos.',
+    'filter.all': 'Todos',
+    'filter.past': 'Anteriores',
+    'help.title': 'Apoio à Comunidade Tecnológica',
+    'help.desc': 'Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.',
+    'help.submit': 'Enviar Pedido',
+    'help.sent': 'Pedido Enviado com Sucesso',
+    'section.contactos.title': 'Entre em Contacto',
+    'section.contactos.sub': 'Junte-se à nossa comunidade através do email, redes sociais ou eventos presenciais.',
     'contact.email': 'Email',
     'contact.instagram': 'Instagram',
     'contact.linkedin': 'LinkedIn',
     'contact.youtube': 'YouTube',
-    'contact.website': 'Website',
+    'contact.website': 'Website Oficial',
     'links.universidade': 'Universidade',
     'links.parceiros': 'Parceiros',
     'links.eventos': 'Eventos',
     'label.news': 'Notícia',
-    'label.upcoming': 'Brevemente',
-    'label.tba': 'Sem data anunciada',
-    'button.more': 'Saber mais',
-    'empty.past': 'Não existem eventos passados disponíveis.'
+    'label.upcoming': 'Próximamente',
+    'label.tba': 'Data a Anunciar',
+    'button.more': 'Saber Mais',
+    'empty.past': 'Não existem eventos anteriores disponíveis.'
   },
   en: {
     'nav.quem': 'Who we are',
@@ -81,8 +101,9 @@ const i18n = {
     'features.talks.desc': 'Guest speakers and knowledge sharing.',
     'features.comunidade.title': 'Community',
     'features.comunidade.desc': 'Social activities and networking.',
-    'section.sobre.title': 'About',
-    'section.sobre.text': 'Computer Engineering focuses on designing, developing and maintaining hardware and software systems. It powers the technology around us—from mobile apps and websites to enterprise systems, AI and robotics—covering programming, databases, networks, algorithms and computer architecture. Computer engineers turn complex ideas into working technological solutions.\n\nThis degree offers strong career advantages: high employability and resilience to crises, with constant demand for skilled professionals, often accompanied by competitive salaries.\n\nCareer diversity is a key strength as well, enabling specialization in areas like Cybersecurity, Game Development, Cloud Computing, Data Science or Artificial Intelligence. It is a modern profession that often allows remote work and flexible schedules. The skills are globally applicable, opening international opportunities and continuous work with cutting-edge technologies and innovation.',
+    'section.sobre.title': 'About Computer Engineering',
+    'section.sobre.text': 'Computer Engineering is the field that designs, develops and maintains the technological systems that transform the world. At UFP, the course stands out for its strong practical component, real projects with partner companies and solid preparation for market challenges.\n\nWith a 95% employability rate, our graduates quickly integrate into stimulating careers in Data Science, Cloud Computing, DevOps, Cybersecurity, Artificial Intelligence and much more.',
+    'section.sobre.link': 'Learn More About the Course',
     'stats.empregabilidade': 'Employment rate',
     'stats.parceiros': 'Partner companies',
     'section.noticias.title': 'News',
@@ -217,6 +238,15 @@ function renderEvents(list) {
     body.appendChild(actions);
     card.appendChild(img);
     card.appendChild(body);
+
+    // Make the whole card clickable
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking on the button itself
+      if (e.target.tagName === 'A' || e.target.closest('a')) return;
+      btn.click();
+    });
+
     root.appendChild(card);
     observer.observe(card);
   });
@@ -309,6 +339,7 @@ function initBackground() {
   window.addEventListener('mouseleave', () => { mouse.has = false; });
   function step() {
     ctx.clearRect(0, 0, w, h);
+    const isDark = document.body.classList.contains('dark-mode');
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
       if (mouse.has) {
@@ -320,7 +351,11 @@ function initBackground() {
       if (n.x < -50 || n.x > w + 50) n.vx *= -1;
       if (n.y < -50 || n.y > h + 50) n.vy *= -1;
       ctx.beginPath();
-      ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      if (isDark) {
+        ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
+      } else {
+        ctx.fillStyle = `hsla(${n.hue}, 70%, 35%, 0.6)`;
+      }
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -330,7 +365,11 @@ function initBackground() {
         const dx = a.x - b.x, dy = a.y - b.y; const dist = Math.hypot(dx, dy);
         if (dist < 140) {
           const alpha = 0.10 + (140 - dist) / 140 * 0.20;
-          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          if (isDark) {
+            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          } else {
+            ctx.strokeStyle = `rgba(0,0,0,${alpha * 0.5})`;
+          }
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
