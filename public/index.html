@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="css/form.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     </head>
   <body>
     <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
@@ -119,12 +121,20 @@
 
       <section id="contactos" class="section alt">
         <div class="container">
-          <div class="help-block reveal-on-scroll">
-            <h3 class="section-title" data-i18n="help.title">Apoio à Comunidade Tecnológica</h3>
-            <p class="section-subtitle" data-i18n="help.desc">Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.</p>
-            <form id="ajuda-form" class="ajuda-form">
-              <textarea id="ajuda-texto" name="ajuda-texto" placeholder="Descreva a sua necessidade (ex: preciso de ajuda para escolher um computador até 600€, gostaria de desenvolver um website para o meu negócio, preciso de orientação sobre cibersegurança)" required></textarea>
-              <button type="submit" class="btn primary" data-i18n="help.submit">Enviar pedido</button>
+          <div class="reveal-on-scroll" style="text-align: center; margin-bottom: 20px;">
+            <h3 class="section-title" data-i18n="help.title" >Apoio à Comunidade Tecnológica</h3>
+
+            
+            <p class="section-subtitle" data-i18n="help.desc" >Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.</p>
+          </div>
+            <form id="ajuda-form" class="form-card reveal-on-scroll">
+              <textarea id="ajuda-texto" name="ajuda-texto" class="custom-input" name="ajuda-texto" rows="5"  placeholder="Descreva a sua necessidade " required></textarea>
+              <input type="email" id="ajuda-email"  class="custom-input"   placeholder="O seu email para resposta (ex: user@gmail.com)" required 
+                style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; background: rgba(255,255,255,0.05); color: inherit;">
+                <div class="g-recaptcha">
+                  <div  data-sitekey="6LetazssAAAAANWF0q-tS1yzVsefgLIssdX46uWA" ></div>
+                </div>  
+              <button type="submit" onclick="enviarPedido()" class="btn primary" data-i18n="help.submit">Enviar pedido</button>
             </form>
           </div>
           <h2 class="section-title reveal-on-scroll" data-i18n="section.contactos.title">Contacte-nos</h2>

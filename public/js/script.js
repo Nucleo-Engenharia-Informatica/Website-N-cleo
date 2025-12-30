@@ -496,3 +496,4 @@ function initHelpForm() {
 initHelpForm();
 applyLangToDom();
 initLangToggle();
+

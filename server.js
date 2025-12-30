@@ -195,3 +195,47 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📁 Serving static files from: ${join(__dirname, 'dist')}`);
   console.log(`🔌 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
 });
+
+async function enviarPedido() {
+    const texto = document.getElementById('ajuda-texto').value;
+    const email = document.getElementById('ajuda-email').value;
+    const captchaToken = grecaptcha.getResponse(); // Pega a resposta do "Não sou um robô"
+
+    // Validações simples
+    if (!texto.trim()) return alert('Por favor, descreva o seu pedido.');
+    if (!email.includes('@')) return alert('Por favor, indique um email válido.');
+    if (!captchaToken) return alert('Por favor, complete a verificação "Não sou um robô".');
+
+    const btn = document.querySelector('#ajuda-form button');
+    const textoOriginal = btn.innerText;
+    btn.innerText = 'A enviar...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/ajuda', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                text: texto, 
+                email: email, 
+                captcha: captchaToken 
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert('Pedido enviado com sucesso! Irá receber a resposta no email.');
+            document.getElementById('ajuda-form').reset(); // Limpa o formulário
+            grecaptcha.reset(); // Reinicia o captcha para novo uso
+        } else {
+            alert('Erro: ' + (data.message || 'Ocorreu um problema.'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erro de conexão ao servidor.');
+    } finally {
+        btn.innerText = textoOriginal;
+        btn.disabled = false;
+    }
+}
