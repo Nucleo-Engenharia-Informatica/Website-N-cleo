@@ -29,6 +29,10 @@ RUN npm ci --only=production
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+# --- CORREÇÃO AQUI EM BAIXO ---
+# Copia a pasta JS onde está o admin.js
+COPY --from=builder /app/public/js ./dist/js
+
 # Copy images folder to dist
 COPY --from=builder /app/public/images ./dist/images
 

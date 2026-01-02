@@ -111,24 +111,41 @@ function renderPedidos({ pendentes, respondidos }) {
     const lr = document.getElementById('lista-respondidos');
     if(!lp || !lr) return;
 
-    lp.innerHTML = pendentes.map(p => `
+    // --- LISTA DE PENDENTES (Para responder) ---
+    lp.innerHTML = pendentes.length ? pendentes.map(p => `
         <div class="pedido-card">
-            <div class="pedido-meta">${new Date(p.data_envio).toLocaleString('pt-PT')}</div>
-            <p>${p.texto}</p>
+            <div class="pedido-meta">
+                <span>📅 ${new Date(p.data_envio).toLocaleString('pt-PT')}</span>
+                <span style="margin-left: 15px; color: #00d4ff;">📧 ${p.email || 'Sem email'}</span>
+            </div>
+            
+            <div class="pedido-text">${p.texto}</div>
+            
             <div class="pedido-actions">
-                <textarea id="reply-${p.id}" placeholder="Escrever resposta..."></textarea>
-                <button class="btn primary" onclick="responderPedido(${p.id})">Responder</button>
+                <textarea id="reply-${p.id}" placeholder="Escrever resposta técnica..."></textarea>
+                <button class="btn primary" onclick="responderPedido(${p.id})">Enviar Resposta</button>
             </div>
         </div>
-    `).join('');
+    `).join('') : '<p style="color:var(--muted)">Nenhum pedido pendente.</p>';
 
-    lr.innerHTML = respondidos.map(p => `
-        <div class="pedido-card">
-            <div class="pedido-meta">Enviado em: ${new Date(p.data_envio).toLocaleString('pt-PT')}</div>
-            <p><strong>Pedido:</strong> ${p.texto}</p>
-            <p style="color: var(--primary)"><strong>Resposta:</strong> ${p.resposta}</p>
+    // --- LISTA DE RESPONDIDOS (Histórico) ---
+    lr.innerHTML = respondidos.length ? respondidos.map(p => `
+        <div class="pedido-card" style="border-left: 4px solid var(--success);">
+            <div class="pedido-meta">
+                <span>📅 Respondido a: ${p.data_resposta ? new Date(p.data_resposta).toLocaleString('pt-PT') : 'N/A'}</span>
+                <br>
+                <span style="font-size: 0.9em; opacity: 0.8;">📧 Enviado para: ${p.email || 'Sem email'}</span>
+            </div>
+            
+            <p style="color: var(--dark-text-muted); font-size: 0.9rem; margin-bottom:0.5rem">Pedido:</p>
+            <div class="pedido-text" style="margin-bottom: 1.5rem">${p.texto}</div>
+            
+            <div style="background: rgba(63, 185, 80, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--success);">
+                <p style="color: var(--success); font-weight: bold; margin:0 0 0.5rem 0;">✅ Resposta:</p>
+                <p style="margin:0; color: var(--dark-text);">${p.resposta}</p>
+            </div>
         </div>
-    `).join('');
+    `).join('') : '<p style="color:var(--muted)">Histórico vazio.</p>';
 }
 
 window.responderPedido = async function(id) {

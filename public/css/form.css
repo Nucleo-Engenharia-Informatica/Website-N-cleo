@@ -1,0 +1,71 @@
+/* O Cartão Branco (Apenas para o formulário) */
+.form-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 600px; /* Largura controlada */
+    margin: 30px auto; /* Centraliza o cartão */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+/* Campos de Input (Email e Texto) */
+.custom-input {
+    width: 100%;
+    background-color: #f3f4f6; /* Fundo cinza claro */
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px; /* Espaço entre os campos */
+    font-size: 16px;
+    color: #333; /* Texto escuro */
+    font-family: inherit;
+    transition: border 0.3s;
+}
+
+.custom-input:focus {
+    border-color: #00d4ff; /* Cor de destaque */
+    outline: none;
+    background-color: #fff;
+}
+
+/* Centralizar o Recaptcha */
+.captcha-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Ajuste para o Botão ocupar a largura toda do cartão */
+.form-card .btn.primary {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+body.dark-mode .form-card {
+    background-color: transparent; 
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* 2. MAS os inputs mantêm-se BRANCOS e com texto PRETO */
+body.dark-mode .custom-input {
+    background-color: #ffffff !important; /* Fundo Branco */
+    border: 1px solid #ccc !important;
+    color: #333333 !important; /* Texto Preto */
+}
+
+/* Cor do texto de ajuda (placeholder) para se ver bem no branco */
+body.dark-mode .custom-input::placeholder {
+    color: #888888;
+}
+
+/* Cor da borda quando clicas para escrever */
+body.dark-mode .custom-input:focus {
+    border-color: #00d4ff !important;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}

@@ -8,114 +8,263 @@
     <link rel="stylesheet" href="/css/styles.css" />
     <style>
         :root { --sidebar-width: 260px; }
-        body { background: #f8f9fa; display: flex; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; }
         
-        /* Login Overlay */
+        /* Forçar layout Admin a usar variáveis Dark Mode por defeito */
+        body.admin-page {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Login Overlay - Estilo Matrix/Terminal */
         #login-overlay { 
-            position: fixed; inset: 0; background: rgba(12, 16, 32, 0.95); 
-            z-index: 9999; display: none; align-items: center; justify-content: center; 
+            position: fixed; inset: 0; 
+            background: rgba(13, 17, 23, 0.98); 
+            z-index: 9999; display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(10px);
         }
         .login-card { 
-            background: white; padding: 2.5rem; border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 380px; 
+            background: var(--dark-surface); 
+            padding: 2.5rem; 
+            border-radius: 24px; 
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 217, 163, 0.15); 
+            text-align: center; width: 100%; max-width: 380px; 
+        }
+        .login-input {
+            background: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            color: var(--primary);
+            width: 100%;
+            margin: 1rem 0;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 4px;
+            font-size: 1.2rem;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 217, 163, 0.2);
         }
         
         /* Sidebar Layout */
         .sidebar { 
-            width: var(--sidebar-width); background: white; border-right: 1px solid var(--border); 
-            padding: 2rem 1rem; position: fixed; height: 100vh; overflow-y: auto;
+            width: var(--sidebar-width); 
+            background: var(--dark-surface); 
+            border-right: 1px solid var(--dark-border); 
+            padding: 2rem 1rem; 
+            position: fixed; 
+            height: 100vh; 
+            overflow-y: auto;
+            z-index: 10;
         }
-        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 3rem; }
+        .brand-admin {
+            font-size: 1.5rem; 
+            padding-left: 1rem; 
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .main-content { 
+            margin-left: var(--sidebar-width); 
+            flex: 1; 
+            padding: 3rem; 
+            background-image: radial-gradient(circle at top right, rgba(0, 217, 163, 0.03), transparent 40%);
+        }
         
-        .nav-menu { list-style: none; padding: 0; margin: 2rem 0; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; }
         .nav-item { 
-            padding: 12px 16px; border-radius: 12px; cursor: pointer; 
-            transition: all 0.2s; color: var(--muted); display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            color: var(--dark-text-muted); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
             margin-bottom: 8px;
+            font-weight: 500;
         }
-        .nav-item:hover { background: #f0f2f5; color: var(--primary); }
-        .nav-item.active { background: var(--primary); color: white; }
+        .nav-item:hover { 
+            background: rgba(255,255,255,0.03); 
+            color: var(--primary); 
+            transform: translateX(4px);
+        }
+        .nav-item.active { 
+            background: var(--primary); 
+            color: #0d1117; /* Dark BG color for contrast on green */
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0, 217, 163, 0.3);
+        }
 
-        /* Views */
+        /* Views & Cards */
         .admin-view { display: none; }
-        .admin-view.active { display: block; animation: fadeIn 0.3s ease; }
+        .admin-view.active { display: block; animation: fadeIn 0.4s ease; }
 
-        /* Profile Specific */
-        .profile-container { text-align: center; max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 24px; border: 1px solid var(--border); }
+        .profile-container { 
+            text-align: center; max-width: 600px; margin: 0 auto; 
+            background: var(--dark-surface); 
+            padding: 2rem; border-radius: 24px; 
+            border: 1px solid var(--dark-border); 
+        }
         .profile-pic-wrapper { position: relative; width: 120px; height: 120px; margin: 0 auto 1.5rem; }
-        .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: #eee; }
+        .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); background: #161b22; }
         
+        .pedido-card { 
+            background: var(--dark-surface); 
+            border: 1px solid var(--dark-border); 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 16px; 
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .pedido-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .pedido-meta { 
+            font-size: 0.85rem; 
+            color: var(--primary); 
+            margin-bottom: 12px; 
+            font-family: monospace;
+            opacity: 0.8;
+        }
+        .pedido-text {
+            color: var(--dark-text);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .pedido-actions textarea { 
+            width: 100%; 
+            border-radius: 12px; 
+            border: 1px solid var(--dark-border); 
+            padding: 12px; 
+            margin: 10px 0; 
+            background: var(--dark-bg);
+            color: var(--dark-text);
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .pedido-actions textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Inputs do Perfil */
+        .input-dark {
+            background: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            color: var(--dark-text);
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .input-dark:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        label { color: var(--dark-text-muted); display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .pedido-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-        .pedido-meta { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; }
-        .pedido-actions textarea { width: 100%; border-radius: 12px; border: 1px solid var(--border); padding: 12px; margin: 10px 0; font-family: inherit; }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; padding: 1rem 0.5rem; }
+            .brand-admin span, .nav-item span { display: none; }
+            .main-content { margin-left: 60px; padding: 1.5rem; }
+            .nav-item { justify-content: center; }
+            .brand-admin { text-align: center; padding: 0; font-size: 1.2rem; }
+        }
     </style>
 </head>
-<body>
+<body class="dark-mode admin-page">
 
     <div id="login-overlay">
         <div class="login-card">
-            <h2 style="margin-top:0">Acesso Restrito</h2>
-            <p class="muted">Insira a palavra-passe de administrador</p>
-            <input type="password" id="admin-pass" class="btn" style="background:#f0f2f5; border:1px solid #ddd; width:100%; margin: 1rem 0; color: black; text-align: center;" placeholder="••••">
-            <button onclick="checkPass()" class="btn primary" style="width:100%">Entrar</button>
-            <a href="/index.html" style="display:block; margin-top:1rem; font-size:14px; color:var(--muted)">Voltar ao site</a>
+            <h2 style="margin-top:0; color: var(--primary);">SYSTEM ACCESS</h2>
+            <p style="color: var(--dark-text-muted);">Administração NEI</p>
+            <input type="password" id="admin-pass" class="btn login-input" placeholder="••••">
+            <button onclick="checkPass()" class="btn primary" style="width:100%">ENTRAR</button>
+            <a href="/index.html" style="display:block; margin-top:1.5rem; font-size:14px; color:var(--dark-text-muted); text-decoration: none;">&larr; Voltar ao site</a>
         </div>
     </div>
 
     <aside class="sidebar">
-        <div class="brand" style="font-size: 1.5rem; padding-left: 1rem;">Admin NEI</div>
+        <div class="brand-admin">NEI <span>Admin</span></div>
         <ul class="nav-menu">
-            <li class="nav-item active" onclick="showView('pendentes', event)">📥 <span>Pendentes</span></li>
-            <li class="nav-item" onclick="showView('respondidos', event)">✅ <span>Respondidos</span></li>
-            <li class="nav-item" onclick="showView('perfil', event)">👤 <span>Meu Perfil</span></li>
+            <li class="nav-item active" onclick="showView('pendentes', event)">
+                <span style="font-size: 1.2rem">📥</span> <span>Pendentes</span>
+            </li>
+            <li class="nav-item" onclick="showView('respondidos', event)">
+                <span style="font-size: 1.2rem">✅</span> <span>Respondidos</span>
+            </li>
+            <li class="nav-item" onclick="showView('perfil', event)">
+                <span style="font-size: 1.2rem">👤</span> <span>Perfil</span>
+            </li>
         </ul>
-        <hr style="border:0; border-top:1px solid #eee; margin: 2rem 0;">
-        <button onclick="localStorage.removeItem('admin_auth'); location.reload();" class="btn small" style="width:100%">Sair</button>
+        <div style="position: absolute; bottom: 2rem; left: 1rem; right: 1rem;">
+            <button onclick="localStorage.removeItem('admin_auth'); location.reload();" class="btn small" style="width:100%; border-color: var(--dark-border); background: transparent; color: var(--muted);">
+                Sair
+            </button>
+        </div>
     </aside>
 
     <main class="main-content">
         
         <section id="view-pendentes" class="admin-view active">
             <h2 class="section-title">Pedidos Pendentes</h2>
+            <p class="section-subtitle">Apoio à Comunidade</p>
             <div id="lista-pendentes" style="display: grid; gap: 1rem; grid-template-columns: 1fr;">
                 </div>
         </section>
 
         <section id="view-respondidos" class="admin-view">
-            <h2 class="section-title">Histórico de Respostas</h2>
+            <h2 class="section-title">Histórico</h2>
+            <p class="section-subtitle">Pedidos já processados</p>
             <div id="lista-respondidos" style="display: grid; gap: 1rem; grid-template-columns: 1fr;">
                 </div>
         </section>
 
         <section id="view-perfil" class="admin-view">
-            <h2 class="section-title">O Meu Perfil</h2>
+            <h2 class="section-title">Perfil do Admin</h2>
             <div class="profile-container">
                 <div class="profile-pic-wrapper">
-                    <img id="profile-img-preview" class="profile-pic" src="https://via.placeholder.com/120" alt="Foto de Perfil">
+                    <img id="profile-img-preview" class="profile-pic" src="" alt="Foto">
                     <input type="file" id="upload-photo" hidden accept="image/*">
                 </div>
                 <button onclick="document.getElementById('upload-photo').click()" class="btn small" style="margin-bottom: 1rem;">Alterar Foto</button>
                 
                 <div style="margin: 1.5rem 0;">
-                    <div class="stat-card" style="display:inline-block; padding: 1rem 2rem;">
+                    <div class="stat-card" style="display:inline-block; padding: 1rem 2rem; background: var(--dark-bg);">
                         <div class="stat-value" id="count-total">0</div>
-                        <div class="stat-label">Pedidos Respondidos</div>
+                        <div class="stat-label">Respostas Dadas</div>
                     </div>
                 </div>
 
-                <div style="display: grid; gap: 12px; max-width: 400px; margin: 2rem auto 0;">
-                    <label style="text-align:left; font-size:12px; font-weight:600">NOME PÚBLICO</label>
-                    <input type="text" id="perfil-nome" placeholder="Seu Nome" class="btn" style="background:white; border:1px solid #ddd; color:black; text-align:left">
+                <div style="display: grid; gap: 12px; text-align: left; margin-top: 1rem;">
+                    <div>
+                        <label>NOME PÚBLICO</label>
+                        <input type="text" id="perfil-nome" class="input-dark" placeholder="Nome">
+                    </div>
+                    <div>
+                        <label>LINK INSTAGRAM</label>
+                        <input type="text" id="perfil-insta" class="input-dark" placeholder="https://instagram.com/...">
+                    </div>
+                    <div>
+                        <label>LINK LINKEDIN</label>
+                        <input type="text" id="perfil-linkedin" class="input-dark" placeholder="https://linkedin.com/in/...">
+                    </div>
                     
-                    <label style="text-align:left; font-size:12px; font-weight:600">LINK INSTAGRAM</label>
-                    <input type="text" id="perfil-insta" placeholder="https://instagram.com/..." class="btn" style="background:white; border:1px solid #ddd; color:black; text-align:left">
-                    
-                    <label style="text-align:left; font-size:12px; font-weight:600">LINK LINKEDIN</label>
-                    <input type="text" id="perfil-linkedin" placeholder="https://linkedin.com/in/..." class="btn" style="background:white; border:1px solid #ddd; color:black; text-align:left">
-                    
-                    <button onclick="saveProfile()" class="btn primary" style="margin-top:1rem">Guardar Alterações</button>
+                    <button onclick="saveProfile()" class="btn primary" style="margin-top:1rem; width: 100%;">Guardar Alterações</button>
                 </div>
             </div>
         </section>
