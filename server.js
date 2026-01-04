@@ -9,189 +9,141 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY; 
 
-// Database connection pool
+// Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' && process.env.DATABASE_URL.includes('neon.tech')
+  ssl: process.env.NODE_ENV === 'production' && process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech')
     ? { rejectUnauthorized: false }
     : false
 });
 
-// Test database connection
+// Test DB Connection
 pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Database connected successfully:', res.rows[0].now);
-  }
+  if (err) console.error('❌ Erro ao conectar BD:', err);
+  else console.log('✅ Base de dados conectada:', res.rows[0].now);
 });
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS middleware for development
+// CORS (apenas para desenvolvimento local)
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
-// API Routes
+// --- API ROUTES ---
 
-// POST /api/ajuda - Handle help requests
+// 1. Receber Pedido de Ajuda (Com Email e Captcha)
 app.post('/api/ajuda', async (req, res) => {
   try {
-    const { text, at } = req.body || {};
+    const { text, email, captcha } = req.body;
 
-    if (!text || typeof text !== 'string' || text.trim() === '') {
-      return res.status(400).json({ message: 'O campo de texto é obrigatório.' });
+    // Validações
+    if (!text || !email) {
+      return res.status(400).json({ message: 'Texto e email são obrigatórios.' });
     }
 
+    // Verificar ReCaptcha com a Google
+    if (RECAPTCHA_SECRET && captcha) {
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET}&response=${captcha}`;
+        const googleRes = await fetch(verifyUrl, { method: 'POST' });
+        const googleData = await googleRes.json();
+        if (!googleData.success) {
+            return res.status(400).json({ message: 'Falha na verificação de robô (ReCaptcha).' });
+        }
+    }
+
+    // Inserir na BD
     const result = await pool.query(
-      `INSERT INTO pedidos_ajuda (texto, data_envio, status)
-       VALUES ($1, $2, $3)
-       RETURNING id, data_envio`,
-      [text, at ? new Date(at).toISOString() : new Date().toISOString(), 'pending']
-    );
-
-    res.status(200).json({
-      message: 'Pedido de ajuda guardado com sucesso.',
-      id: result.rows[0].id,
-      data_envio: result.rows[0].data_envio
-    });
-
-  } catch (error) {
-    console.error('Erro ao guardar o pedido de ajuda:', error);
-    res.status(500).json({
-      message: 'Erro interno do servidor. Não foi possível guardar o pedido.',
-      error: error.message
-    });
-  }
-});
-
-// GET /api/usuarios - List all users
-app.get('/api/usuarios', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT nome, foto_url, linkedin_url, instagram_url
-       FROM usuarios
-       ORDER BY nome ASC`
-    );
-    return res.status(200).json(result.rows);
-  } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-// PUT /api/usuarios - Update user profile
-app.put('/api/usuarios', async (req, res) => {
-  try {
-    const { nome, foto_url, linkedin_url, instagram_url } = req.body;
-
-    const result = await pool.query(
-      `UPDATE usuarios
-       SET nome = $1,
-           foto_url = $2,
-           linkedin_url = $3,
-           instagram_url = $4
-       WHERE id = 1
+      `INSERT INTO pedidos_ajuda (texto, email, data_envio, status)
+       VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [nome, foto_url, linkedin_url, instagram_url]
+      [text, email, new Date().toISOString(), 'pending']
     );
 
-    return res.status(200).json({
-      message: 'Perfil atualizado',
-      id: result.rows[0].id
-    });
+    res.status(200).json({ message: 'Pedido enviado!', id: result.rows[0].id });
+
   } catch (error) {
-    console.error('Erro ao atualizar perfil:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Erro no pedido de ajuda:', error);
+    res.status(500).json({ message: 'Erro interno.', error: error.message });
   }
 });
 
-// GET /api/pedidos - Get help requests
+// 2. Listar Pedidos (Para o Admin)
 app.get('/api/pedidos', async (req, res) => {
   try {
+    // Agora incluímos o email na seleção
     const result = await pool.query(
-      `SELECT id, texto, data_envio, status, resposta, data_resposta
-       FROM pedidos_ajuda
-       ORDER BY data_envio DESC`
+      `SELECT id, texto, email, data_envio, status, resposta, data_resposta
+       FROM pedidos_ajuda ORDER BY data_envio DESC`
     );
-    return res.status(200).json(result.rows);
+    res.json(result.rows);
   } catch (error) {
-    console.error('Erro ao buscar pedidos:', error);
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// POST /api/responder - Respond to help request
+// 3. Responder a Pedido (Para o Admin)
 app.post('/api/responder', async (req, res) => {
   try {
     const { id, resposta } = req.body;
-
-    if (!id || !resposta) {
-      return res.status(400).json({ message: 'ID e resposta são obrigatórios.' });
-    }
+    if (!id || !resposta) return res.status(400).json({ message: 'Dados incompletos.' });
 
     const result = await pool.query(
       `UPDATE pedidos_ajuda
-       SET resposta = $1,
-           data_resposta = $2,
-           status = $3
-       WHERE id = $4
-       RETURNING id`,
-      [resposta, new Date().toISOString(), 'respondido', id]
+       SET resposta = $1, data_resposta = $2, status = 'respondido'
+       WHERE id = $3 RETURNING id`,
+      [resposta, new Date().toISOString(), id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Pedido não encontrado.' });
-    }
-
-    return res.status(200).json({
-      message: 'Resposta enviada com sucesso.',
-      id: result.rows[0].id
-    });
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+    
+    // AQUI FUTURAMENTE PODESse ADICIONAR ENVIO DE EMAIL AUTOMÁTICO (Nodemailer)
+    
+    res.json({ message: 'Resposta guardada.' });
   } catch (error) {
-    console.error('Erro ao responder pedido:', error);
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Serve static files from dist directory
+// 4. Perfil Admin (Ler e Atualizar)
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM usuarios LIMIT 1');
+        res.json(result.rows);
+    } catch (e) { res.status(500).json({error: e.message}); }
+});
+
+app.put('/api/usuarios', async (req, res) => {
+    try {
+        const { nome, linkedin_url, instagram_url } = req.body;
+        // Assume que existe um user com ID 1
+        await pool.query(
+            `UPDATE usuarios SET nome=$1, linkedin_url=$2, instagram_url=$3 WHERE id=1`,
+            [nome, linkedin_url, instagram_url]
+        );
+        res.json({ message: 'Perfil atualizado' });
+    } catch (e) { res.status(500).json({error: e.message}); }
+});
+
+// Servir Ficheiros Estáticos (Frontend)
+// Nota: O Docker copia para 'dist', mas localmente pode ser 'public'.
+// O código abaixo tenta servir do 'dist' primeiro.
 app.use(express.static(join(__dirname, 'dist')));
 
-// Handle client-side routing - serve index.html for all non-API routes
+// Fallback para SPA (Single Page Application) ou rotas não encontradas
 app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({
-    message: 'Erro interno do servidor',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  pool.end(() => {
-    console.log('Database pool closed');
-    process.exit(0);
-  });
-});
-
+// Iniciar Servidor
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📁 Serving static files from: ${join(__dirname, 'dist')}`);
-  console.log(`🔌 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
