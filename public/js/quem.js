@@ -44,7 +44,7 @@ function getMembrosReais() {
     {
       id: 'membro-1',
       name: 'Diogo Vicente',
-      cover: 'https://picsum.photos/seed/joao/360/360', // Substitui pelo caminho da tua imagem (ex: 'img/joao.jpg')
+      cover: 'https://picsum.photos/seed/joao/360/360', 
       github: 'https://github.com/DiogoVicente8',
       linkedin: 'https://www.linkedin.com/in/diogo-vicente-b2202b31a/'
     },
@@ -81,6 +81,34 @@ function getMembrosReais() {
       name: 'Pedro Ramos ',
       cover: 'https://picsum.photos/seed/pedro/360/360',
       github: 'https://github.com/Ricardo132-maker',
+      linkedin: 'https://www.linkedin.com'
+    },
+    {
+      id: 'membro-7',
+      name: 'João Reis',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/joaoreis2121',
+      linkedin: 'http://linkedin.com/in/joão-reis-50549a38a'
+    },
+    {
+      id: 'membro-8',
+      name: 'Tiago Durães',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/IDuraess',
+      linkedin: 'https://www.linkedin.com'
+    },
+    {
+      id: 'membro-9',
+      name: 'Rayssa Santos',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/rcs-raysantos ',
+      linkedin: 'https://www.linkedin.com'
+    },
+    {
+      id: 'membro-10',
+      name: 'Filipe Silva',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/FilipeSilva23',
       linkedin: 'https://www.linkedin.com'
     },
   ];

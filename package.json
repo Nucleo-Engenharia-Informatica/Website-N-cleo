@@ -15,7 +15,12 @@
     "docker:logs": "docker-compose logs -f",
     "docker:restart": "docker-compose restart app"
   },
-  "keywords": ["nuclear", "informatica", "ufp", "university"],
+  "keywords": [
+    "nuclear",
+    "informatica",
+    "ufp",
+    "university"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -24,6 +29,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "express": "^4.18.2",
+    "nodemailer": "^7.0.12",
     "pg": "^8.11.3"
   }
 }
