@@ -39,14 +39,18 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verificar se o servidor de email está pronto
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log('❌ Erro na configuração do Email (SMTP):', error);
-  } else {
-    console.log('✅ Servidor de Email pronto a enviar.');
-  }
-});
+// Verificar se o servidor de email está pronto (COM PROTEÇÃO PARA BUILD)
+if (process.env.SMTP_HOST) {
+  transporter.verify(function (error, success) {
+    if (error) {
+      console.log('❌ Erro na configuração do Email (SMTP):', error);
+    } else {
+      console.log('✅ Servidor de Email pronto a enviar.');
+    }
+  });
+} else {
+  console.log('⚠️ Aviso: Credenciais SMTP não encontradas. O envio de emails não funcionará neste ambiente.');
+}
 
 // Middleware
 app.use(express.json());
@@ -175,13 +179,22 @@ app.post('/api/responder', async (req, res) => {
       [resposta, new Date().toISOString(), id]
     );
 
+
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+
+    // RESPOSTA FINAL (CORRIGIDA: Apenas uma resposta JSON)
     res.json({ message: 'Resposta enviada por email e guardada.' });
 
   } catch (error) {
     console.error("❌ Erro ao responder:", error);
-    res.status(500).json({ error: 'Erro ao enviar email ou guardar na BD.', details: error.message });
+    // Garantir que enviamos apenas uma resposta de erro se algo falhar
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Erro ao enviar email ou guardar na BD.', details: error.message });
+    }
   }
 });
+
+    
 
 // 4. Perfil Admin (Ler e Atualizar)
 app.get('/api/usuarios', async (req, res) => {

@@ -95,21 +95,31 @@ function getMembrosReais() {
       name: 'Tiago Durães',
       cover: 'https://picsum.photos/seed/pedro/360/360',
       github: 'https://github.com/IDuraess',
-      linkedin: 'https://www.linkedin.com'
     },
     {
       id: 'membro-9',
       name: 'Rayssa Santos',
       cover: 'https://picsum.photos/seed/pedro/360/360',
       github: 'https://github.com/rcs-raysantos ',
-      linkedin: 'https://www.linkedin.com'
     },
     {
       id: 'membro-10',
       name: 'Filipe Silva',
       cover: 'https://picsum.photos/seed/pedro/360/360',
       github: 'https://github.com/FilipeSilva23',
-      linkedin: 'https://www.linkedin.com'
+    },
+    {
+      id: 'membro-11',
+      name: 'Winnie Martins',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/ViniMartins114158',
+    },
+    {
+      id: 'membro-12',
+      name: 'Leonardo Cunha',
+      cover: 'https://picsum.photos/seed/pedro/360/360',
+      github: 'https://github.com/2025111409-del',
+      linkedin:'https://www.linkedin.com/in/leonardo-cunha-moura-73b1293a6?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BEhLAOItzSxOHKD5r2Bo3Qg%3D%3D'
     },
   ];
 }
