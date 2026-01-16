@@ -46,26 +46,72 @@
 }
 
 body.dark-mode .form-card {
-    background-color: transparent; 
+    background-color: rgba(22, 27, 34, 0.6); /* Um fundo escuro subtil */
+    border: 1px solid var(--dark-border); /* Borda subtil */
     box-shadow: none;
-    padding-left: 0;
-    padding-right: 0;
 }
 
-/* 2. MAS os inputs mantêm-se BRANCOS e com texto PRETO */
+/* Inputs Escuros no Dark Mode */
 body.dark-mode .custom-input {
-    background-color: #ffffff !important; /* Fundo Branco */
-    border: 1px solid #ccc !important;
-    color: #333333 !important; /* Texto Preto */
+    background-color: #0d1117 !important; /* Fundo muito escuro */
+    border: 1px solid #30363d !important; /* Borda cinza escuro */
+    color: #c9d1d9 !important; /* Texto claro (cinza quase branco) */
 }
 
-/* Cor do texto de ajuda (placeholder) para se ver bem no branco */
 body.dark-mode .custom-input::placeholder {
-    color: #888888;
+    color: #8b949e; /* Placeholder mais escuro mas legível */
 }
 
-/* Cor da borda quando clicas para escrever */
 body.dark-mode .custom-input:focus {
-    border-color: #00d4ff !important;
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    border-color: #00d9a3 !important; /* Verde do tema ao focar */
+    background-color: #161b22 !important;
+}
+
+/* Estilos para a mensagem de feedback (Erro/Sucesso) */
+.form-feedback {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none; /* Escondido por defeito */
+    text-align: center;
+}
+
+.form-feedback.success {
+    background-color: rgba(63, 185, 80, 0.2);
+    color: #3fb950;
+    border: 1px solid #3fb950;
+}
+
+.form-feedback.error {
+    background-color: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+    border: 1px solid #f85149;
+}
+
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:hover, 
+body.dark-mode input:-webkit-autofill:focus, 
+body.dark-mode input:-webkit-autofill:active,
+body.dark-mode textarea:-webkit-autofill,
+body.dark-mode textarea:-webkit-autofill:hover,
+body.dark-mode textarea:-webkit-autofill:focus,
+body.dark-mode textarea:-webkit-autofill:active {
+    /* O truque é usar uma sombra interna da cor do fundo para tapar o branco do browser */
+    -webkit-box-shadow: 0 0 0 30px #0d1117 inset !important;
+    /* Forçar a cor do texto para claro */
+    -webkit-text-fill-color: #c9d1d9 !important;
+    caret-color: #c9d1d9;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 2. Tornar o reCAPTCHA Escuro */
+/* Como não podemos editar o CSS da Google, usamos um filtro para inverter as cores */
+body.dark-mode .g-recaptcha {
+    filter: invert(0.92) hue-rotate(180deg);
+}
+
+/* Opcional: Ajuste fino para garantir que o filtro não deixa o recaptcha cinzento demais */
+body.dark-mode .g-recaptcha > div {
+    margin: 0 auto; /* Garante que fica centrado */
 }

@@ -518,7 +518,18 @@ document.addEventListener('DOMContentLoaded', () => {
 async function enviarPedido() {
     const texto = document.getElementById('ajuda-texto').value;
     const email = document.getElementById('ajuda-email').value;
+    const feedbackBox = document.getElementById('form-feedback'); // Selecionar a caixa de mensagem
     
+    // Função auxiliar para mostrar mensagens
+    const mostrarMensagem = (msg, tipo) => {
+        feedbackBox.textContent = msg;
+        feedbackBox.className = `form-feedback ${tipo}`; // Define classe 'success' ou 'error'
+        feedbackBox.style.display = 'block';
+    };
+
+    // Limpar mensagens anteriores
+    feedbackBox.style.display = 'none';
+
     // Verifica se o reCAPTCHA existe na página antes de chamar
     let captchaToken = '';
     if (typeof grecaptcha !== 'undefined') {
@@ -526,11 +537,11 @@ async function enviarPedido() {
     }
 
     // Validações
-    if (!texto.trim()) return alert('Por favor, descreva o seu pedido.');
-    if (!email.includes('@')) return alert('Por favor, indique um email válido.');
-    if (typeof grecaptcha !== 'undefined' && !captchaToken) {
-        return alert('Por favor, complete a verificação "Não sou um robô".');
-    }
+    if (!texto.trim()) return mostrarMensagem('Por favor, descreva o seu pedido.', 'error');
+    if (!email.includes('@')) return mostrarMensagem('Por favor, indique um email válido.', 'error');
+    
+    // Validação Captcha opcional (se quiseres forçar, descomenta a linha abaixo)
+    // if (typeof grecaptcha !== 'undefined' && !captchaToken) return mostrarMensagem('Por favor, complete a verificação "Não sou um robô".', 'error');
 
     const btn = document.querySelector('#ajuda-form button');
     const textoOriginal = btn.innerText;
@@ -551,17 +562,18 @@ async function enviarPedido() {
         const data = await res.json();
 
         if (res.ok) {
-            alert('Pedido enviado com sucesso! Irá receber a resposta no email.');
+            mostrarMensagem('Pedido enviado com sucesso! Irá receber a resposta no email.', 'success');
             document.getElementById('ajuda-form').reset();
             if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
         } else {
-            alert('Erro: ' + (data.message || 'Ocorreu um problema.'));
+            mostrarMensagem('Erro: ' + (data.message || 'Ocorreu um problema.'), 'error');
         }
     } catch (err) {
         console.error(err);
-        alert('Erro de conexão ao servidor.');
+        mostrarMensagem('Erro de conexão ao servidor.', 'error');
     } finally {
         btn.innerText = textoOriginal;
         btn.disabled = false;
     }
 }
+

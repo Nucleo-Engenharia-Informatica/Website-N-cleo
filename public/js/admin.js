@@ -98,8 +98,8 @@ async function fetchPedidos() {
         const arr = Array.isArray(data) ? data : [];
         
         return {
-            pendentes: arr.filter(p => !p.resposta),
-            respondidos: arr.filter(p => p.resposta)
+            pendentes: arr.filter(p => !p.resposta || p.status === 'pending'),
+            respondidos: arr.filter(p => p.resposta || p.status === 'respondido')
         };
     } catch (err) {
         return { pendentes: [], respondidos: [] };
@@ -111,7 +111,7 @@ function renderPedidos({ pendentes, respondidos }) {
     const lr = document.getElementById('lista-respondidos');
     if(!lp || !lr) return;
 
-    // --- LISTA DE PENDENTES (Para responder) ---
+    // --- LISTA DE PENDENTES (Com espaço para notificações) ---
     lp.innerHTML = pendentes.length ? pendentes.map(p => `
         <div class="pedido-card">
             <div class="pedido-meta">
@@ -124,6 +124,8 @@ function renderPedidos({ pendentes, respondidos }) {
             <div class="pedido-actions">
                 <textarea id="reply-${p.id}" placeholder="Escrever resposta técnica..."></textarea>
                 <button class="btn primary" onclick="responderPedido(${p.id})">Enviar Resposta</button>
+                
+                <div id="status-${p.id}" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem; min-height: 20px;"></div>
             </div>
         </div>
     `).join('') : '<p style="color:var(--muted)">Nenhum pedido pendente.</p>';
@@ -132,25 +134,46 @@ function renderPedidos({ pendentes, respondidos }) {
     lr.innerHTML = respondidos.length ? respondidos.map(p => `
         <div class="pedido-card" style="border-left: 4px solid var(--success);">
             <div class="pedido-meta">
-                <span>📅 Respondido a: ${p.data_resposta ? new Date(p.data_resposta).toLocaleString('pt-PT') : 'N/A'}</span>
-                <br>
-                <span style="font-size: 0.9em; opacity: 0.8;">📧 Enviado para: ${p.email || 'Sem email'}</span>
+                <span>📅 Respondido: ${p.data_resposta ? new Date(p.data_resposta).toLocaleString('pt-PT') : 'N/A'}</span>
+                <br><span style="font-size: 0.9em; opacity: 0.8;">📧 Para: ${p.email || 'Sem email'}</span>
             </div>
-            
             <p style="color: var(--dark-text-muted); font-size: 0.9rem; margin-bottom:0.5rem">Pedido:</p>
             <div class="pedido-text" style="margin-bottom: 1.5rem">${p.texto}</div>
-            
             <div style="background: rgba(63, 185, 80, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--success);">
                 <p style="color: var(--success); font-weight: bold; margin:0 0 0.5rem 0;">✅ Resposta:</p>
-                <p style="margin:0; color: var(--dark-text);">${p.resposta}</p>
+                <p style="margin:0; color: var(--dark-text); white-space: pre-wrap;">${p.resposta}</p>
             </div>
         </div>
     `).join('') : '<p style="color:var(--muted)">Histórico vazio.</p>';
 }
 
+// 5. NOVA Função Responder (Mensagem na Tela, sem Alert)
 window.responderPedido = async function(id) {
-    const textoResposta = document.getElementById(`reply-${id}`).value;
-    if (!textoResposta) return;
+    const textarea = document.getElementById(`reply-${id}`);
+    const statusDiv = document.getElementById(`status-${id}`); // O local onde vamos escrever
+    const btn = document.querySelector(`button[onclick="responderPedido(${id})"]`);
+    
+    const textoResposta = textarea ? textarea.value : '';
+
+    // Limpar mensagens anteriores
+    if(statusDiv) statusDiv.textContent = '';
+
+    if (!textoResposta || !textoResposta.trim()) {
+        if(statusDiv) {
+            statusDiv.style.color = '#ff4444'; // Vermelho
+            statusDiv.textContent = '⚠️ A resposta não pode estar vazia.';
+        }
+        return;
+    }
+
+    // Feedback Visual: Botão Loading
+    const textoBtnOriginal = btn ? btn.innerText : 'Enviar';
+    if (btn) {
+        btn.innerText = 'A enviar...';
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+    }
+    if (textarea) textarea.disabled = true;
 
     try {
         const res = await fetch('/api/responder', {
@@ -159,12 +182,40 @@ window.responderPedido = async function(id) {
             body: JSON.stringify({ id, resposta: textoResposta })
         });
 
+        const data = await res.json();
+
         if (res.ok) {
-            const lists = await fetchPedidos();
-            renderPedidos(lists);
-            loadAdminData(); // Atualiza contador de respostas
+            // --- SUCESSO: Mensagem no ecrã (VERDE) ---
+            if(statusDiv) {
+                statusDiv.style.color = 'var(--success)'; // Usa a cor verde do teu tema
+                statusDiv.textContent = '✅ Pedido respondido e arquivado!';
+            }
+
+            // Esperar 2 segundos para o user ler a mensagem antes de atualizar a lista
+            setTimeout(async () => {
+                const lists = await fetchPedidos();
+                renderPedidos(lists);
+                loadAdminData();
+            }, 2000);
+
+        } else {
+            throw new Error(data.message || 'Erro desconhecido');
         }
+
     } catch (err) {
-        console.error("Erro ao responder:", err);
+        console.error("Erro:", err);
+        // --- ERRO: Mensagem no ecrã (VERMELHO) ---
+        if(statusDiv) {
+            statusDiv.style.color = '#ff4444';
+            statusDiv.textContent = `❌ Erro: ${err.message}`;
+        }
+        
+        // Devolve o controle ao user
+        if (btn) {
+            btn.innerText = textoBtnOriginal;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+        if (textarea) textarea.disabled = false;
     }
 };
