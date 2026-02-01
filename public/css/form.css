@@ -108,10 +108,14 @@ body.dark-mode textarea:-webkit-autofill:active {
 /* 2. Tornar o reCAPTCHA Escuro */
 /* Como não podemos editar o CSS da Google, usamos um filtro para inverter as cores */
 body.dark-mode .g-recaptcha {
-    filter: invert(0.92) hue-rotate(180deg);
+    filter: invert(1) hue-rotate(180deg);
+    opacity: 0.9;
 }
 
 /* Opcional: Ajuste fino para garantir que o filtro não deixa o recaptcha cinzento demais */
 body.dark-mode .g-recaptcha > div {
     margin: 0 auto; /* Garante que fica centrado */
+}
+.grecaptcha-badge { 
+    visibility: hidden !important;
 }

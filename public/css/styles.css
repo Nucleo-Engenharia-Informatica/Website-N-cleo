@@ -421,4 +421,85 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
   }
 }
 
+.parceiros-inativo {
+  /* 1. Estrutura (Igual aos outros botões para alinhar bem) */
+  display: inline-flex;
+  height: 36px;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 1rem; 
+  
+  /* 2. Visual "Desligado" */
+  background-color: transparent;   
+  border: 1px solid var(--muted);  
+  color: var(--muted);             
+  opacity: 0.5;                    
+  
+  /* 3. Bloqueio */
+  cursor: not-allowed;             
+  pointer-events: none;            
+  user-select: none;               
+}
 
+/* Ajuste opcional para Dark Mode se necessário */
+body.dark-mode .parceiros-inativo {
+  border-color: var(--dark-border);
+  color: var(--dark-text-muted);
+}
+
+
+/* --- Estilos do Logótipo (CORRIGIDO) --- */
+
+
+/* 1. Transforma o link .brand num contentor de pilha (Grid) */
+.brand {
+  display: grid !important;
+  /* Cria uma única célula onde tudo se empilha */
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  align-items: center;
+  justify-items: start; /* Alinha à esquerda */
+}
+
+/* 1. Define o tamanho (Corrige o logo gigante) */
+/* Nota: O nome da classe aqui deve ser .nav-logo para bater certo com o HTML */
+.nav-logo {
+  height: 65px; 
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
+}
+
+/* --- Lógica de Troca (Corrige a visibilidade) --- */
+
+/* Estado Padrão (Modo Claro): */
+/* Mostra apenas os elementos marcados como 'light-only' */
+.dark-only {
+  display: none !important;
+}
+.light-only {
+  display: block !important;
+}
+
+/* Estado Dark Mode (Quando o body tem a classe .dark-mode): */
+/* Esconde o 'light-only' e mostra o 'dark-only' */
+body.dark-mode .light-only {
+  display: none !important;
+}
+
+body.dark-mode .dark-only {
+  display: block !important;
+}
+
+/* Ajuste para telemóveis */
+@media (max-width: 768px) {
+  .nav-logo {
+    height: 45px;
+  }
+}

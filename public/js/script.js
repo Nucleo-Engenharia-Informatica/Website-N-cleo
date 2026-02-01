@@ -83,7 +83,7 @@ const i18n = {
     'links.parceiros': 'Parceiros',
     'links.eventos': 'Eventos',
     'label.news': 'Notícia',
-    'label.upcoming': 'Próximamente',
+    'label.upcoming': 'Brevemente',
     'label.tba': 'Data a Anunciar',
     'button.more': 'Saber Mais',
     'empty.past': 'Não existem eventos anteriores disponíveis.'
