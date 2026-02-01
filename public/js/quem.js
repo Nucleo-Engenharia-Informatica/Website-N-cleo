@@ -76,44 +76,48 @@ function getMembrosReais() {
       github: 'https://github.com/DBorges11',
       linkedin: 'https://www.linkedin.com/in/diogo-borges-335516393/'
     },
-    /* {
+    {
       id: 'membro-6',
       name: 'Pedro Ramos ',
-      cover: 'https://picsum.photos/seed/pedro/360/360',
+      cover: '/images/pedro_ramos.jpeg',
       github: 'https://github.com/Ricardo132-maker',
-      linkedin: 'https://www.linkedin.com'
-    }, */
-    /* {
+      linkedin: 'https://www.linkedin.com/in/ricardo-ramos-4739a3295?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+    }, 
+     {
       id: 'membro-7',
       name: 'João Reis',
-      cover: 'https://picsum.photos/seed/pedro/360/360',
+      cover: '/images/joao_reis.jpeg',
       github: 'https://github.com/joaoreis2121',
       linkedin: 'http://linkedin.com/in/joão-reis-50549a38a'
-    }, */
+    }, 
     /* {
       id: 'membro-8',
       name: 'Tiago Durães',
       cover: 'https://picsum.photos/seed/pedro/360/360',
       github: 'https://github.com/IDuraess',
     }, */
-    /* {
+     {
       id: 'membro-9',
       name: 'Rayssa Santos',
       cover: '/images/Rayssa Santos.png',
       github: 'https://github.com/rcs-raysantos ',
-    }, */
-    /* {
+      linkedin:'https://www.linkedin.com/in/rayssa-santos-a452803a9'
+    }, 
+     {
       id: 'membro-10',
       name: 'Filipe Silva',
-      cover: 'https://picsum.photos/seed/pedro/360/360',
+      cover: '/images/Filipe Silva.png',
       github: 'https://github.com/FilipeSilva23',
-    },*/
-    /* {
+      linkedin:'https://www.linkedin.com/in/filipe-correia-de-almeida-silva-9468b53a9?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+    },
+    {
       id: 'membro-11',
       name: 'Winnie Martins',
       cover: '/images/Winnie Martins.png',
       github: 'https://github.com/ViniMartins114158',
-    }, */
+      linkedin:'https://www.linkedin.com/in/winnie-martins-b8886b3a8/'
+
+    }, 
     {
       id: 'membro-12',
       name: 'Leonardo Cunha',
@@ -140,6 +144,13 @@ function getMembrosReais() {
       cover: '/images/Robi Henrquez.jpeg',
       github: ' https://github.com/Marcelrobi1https://github.com/Marcelrobi1',
       linkedin:'https://www.linkedin.com/in/robi-henrquez-32829a16a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app' 
+    },
+    {
+      id: 'membro-16',
+      name: 'Dione Arantes ',
+      cover: '/images/Dione Arantes.jpeg',
+      github: ' https://github.com/EngArantes',
+      linkedin:'https://www.linkedin.com/in/dione-amaral-arantes-830323117?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app' 
     },
 
   ];

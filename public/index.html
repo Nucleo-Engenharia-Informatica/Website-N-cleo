@@ -9,13 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/styles.css" />
     <link rel="stylesheet" href="css/form.css">
-    <script src="https://www.google.com/recaptcha/api.js?render=6Lem6VEsAAAAAKM7iuKJFV_SaciPvuamAFt7dDqi"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=%VITE_RECAPTCHA_SITE_KEY%"></script>
     </head>
   <body>
     <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
     <header class="site-header">
       <div class="container nav-container">
-        <a class="brand" href="#top">Núcleo EI</a>
+        <a class="brand" href="#top">
+          <img src="NIUFP-Logo.png" alt="Núcleo EI" class="nav-logo light-only">
+          <img src="NIUFP-Logo.png" alt="Núcleo EI" class="nav-logo dark-only">
+        </a>
         <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>

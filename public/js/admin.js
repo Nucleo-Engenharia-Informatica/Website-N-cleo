@@ -17,15 +17,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogin = document.getElementById('btn-login');
     const inputPass = document.getElementById('admin-pass');
 
-    // Função de verificação
-    const performLogin = () => {
+    // Função de verificação (NOVA VERSÃO)
+    const performLogin = async () => {
         const pass = inputPass.value;
-        if (pass === '1234') { 
-            if (overlay) overlay.style.display = 'none';
-            localStorage.setItem('admin_auth', 'true');
-            loadAdminData();
-        } else {
-            alert('Palavra-passe incorreta!');
+        
+        // Feedback visual
+        if(btnLogin) btnLogin.innerText = 'A verificar...';
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pass })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                if (overlay) overlay.style.display = 'none';
+                localStorage.setItem('admin_auth', 'true');
+                loadAdminData();
+            } else {
+                alert('Palavra-passe incorreta!');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao ligar ao servidor.');
+        } finally {
+            if(btnLogin) btnLogin.innerText = 'ENTRAR';
         }
     };
 

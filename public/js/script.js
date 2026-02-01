@@ -83,7 +83,7 @@ const i18n = {
     'links.parceiros': 'Parceiros',
     'links.eventos': 'Eventos',
     'label.news': 'Notícia',
-    'label.upcoming': 'Próximamente',
+    'label.upcoming': 'Brevemente',
     'label.tba': 'Data a Anunciar',
     'button.more': 'Saber Mais',
     'empty.past': 'Não existem eventos anteriores disponíveis.'
@@ -519,7 +519,7 @@ async function enviarPedido() {
     const texto = document.getElementById('ajuda-texto').value;
     const email = document.getElementById('ajuda-email').value;
     const feedbackBox = document.getElementById('form-feedback'); // Selecionar a caixa de mensagem
-    const SITE_KEY = '6Lem6VEsAAAAAKM7iuKJFV_SaciPvuamAFt7dDqi';
+    const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
     
     // Função auxiliar para mostrar mensagens
     const mostrarMensagem = (msg, tipo) => {

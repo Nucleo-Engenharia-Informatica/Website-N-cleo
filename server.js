@@ -67,7 +67,23 @@ app.use((req, res, next) => {
 
 // --- API ROUTES ---
 
-// 1. Receber Pedido de Ajuda (Com Email e Captcha)
+// 1. Rota de Login Admin (NOVO)
+app.post('/api/login', (req, res) => {
+    const { password } = req.body;
+    
+    // O TRUQUE: Tenta ler do servidor. Se não existir, usa '1234'.
+    // Assim, no teu PC funciona sempre com '1234'.
+    // No servidor online, configuras a variável ADMIN_PASS com uma senha difícil.
+    const serverPassword = process.env.ADMIN_PASS || '1234';
+
+    if (password === serverPassword) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, message: 'Password incorreta' });
+    }
+});
+
+// 2. Receber Pedido de Ajuda (Com Email e Captcha)
 app.post('/api/ajuda', async (req, res) => {
   try {
     const { text, email, captcha } = req.body;
@@ -104,7 +120,7 @@ app.post('/api/ajuda', async (req, res) => {
   }
 });
 
-// 2. Listar Pedidos (Para o Admin)
+// 3. Listar Pedidos (Para o Admin)
 app.get('/api/pedidos', async (req, res) => {
   try {
     // Agora incluímos o email na seleção
@@ -118,7 +134,7 @@ app.get('/api/pedidos', async (req, res) => {
   }
 });
 
-// 3. Responder a Pedido (COM ENVIO DE EMAIL)
+// 4. Responder a Pedido (COM ENVIO DE EMAIL)
 app.post('/api/responder', async (req, res) => {
   try {
     const { id, resposta } = req.body;
@@ -197,7 +213,7 @@ app.post('/api/responder', async (req, res) => {
 
     
 
-// 4. Perfil Admin (Ler e Atualizar)
+// 5. Perfil Admin (Ler e Atualizar)
 app.get('/api/usuarios', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM usuarios LIMIT 1');
