@@ -1,5 +1,27 @@
 import { events } from './events.js';
 
+// --- 0. Carregamento Dinâmico do reCAPTCHA (Solução "Sem Variáveis Mágicas") ---
+async function carregarReCaptcha() {
+  try {
+    const response = await fetch('/api/config');
+    const config = await response.json();
+    const SITE_KEY = config.siteKey;
+
+    if (SITE_KEY && SITE_KEY !== "") {
+      const script = document.createElement('script');
+      script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
+      document.head.appendChild(script);
+      
+      // Guarda globalmente para a função enviarPedido usar
+      window.VITE_RECAPTCHA_SITE_KEY = SITE_KEY;
+      console.log("✅ reCAPTCHA configurado via Servidor.");
+    }
+  } catch (err) {
+    console.error("❌ Erro ao obter chave do reCAPTCHA:", err);
+  }
+}
+carregarReCaptcha();
+
 // --- 1. Navegação e UI Geral ---
 const menuToggle = document.querySelector('.menu-toggle');
 const siteNav = document.querySelector('.site-nav');
@@ -519,7 +541,8 @@ async function enviarPedido() {
     const texto = document.getElementById('ajuda-texto').value;
     const email = document.getElementById('ajuda-email').value;
     const feedbackBox = document.getElementById('form-feedback'); // Selecionar a caixa de mensagem
-    const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+    
+    const SITE_KEY = window.VITE_RECAPTCHA_SITE_KEY;
     
     // Função auxiliar para mostrar mensagens
     const mostrarMensagem = (msg, tipo) => {
