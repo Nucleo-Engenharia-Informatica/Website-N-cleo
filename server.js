@@ -16,7 +16,7 @@ const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' && process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech')
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech')
     ? { rejectUnauthorized: false }
     : false
 });
@@ -83,8 +83,16 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+
+app.get('/api/config', (req, res) => {
+  res.json({
+    siteKey: process.env.VITE_RECAPTCHA_SITE_KEY || ''
+  });
+});
+
 // 2. Receber Pedido de Ajuda (Com Email e Captcha)
 app.post('/api/ajuda', async (req, res) => {
+  
   try {
     const { text, email, captcha } = req.body;
 
