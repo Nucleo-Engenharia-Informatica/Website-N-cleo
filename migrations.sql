@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS pedidos_ajuda (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+ALTER TABLE pedidos_ajuda ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE pedidos_ajuda ADD COLUMN IF NOT EXISTS data_resposta TIMESTAMP;
+
 -- 2. Criar a tabela de utilizadores
 CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
@@ -28,3 +31,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
 INSERT INTO usuarios (id, nome) 
 VALUES (1, 'Admin Principal') 
 ON CONFLICT (id) DO NOTHING;
+
+-- 4. Otimização: Índice para buscas rápidas (usado na listagem admin)
+CREATE INDEX IF NOT EXISTS idx_pedidos_data_envio ON pedidos_ajuda(data_envio DESC);

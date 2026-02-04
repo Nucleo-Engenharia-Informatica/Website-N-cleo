@@ -20,6 +20,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+
 # Copy package files
 COPY package*.json ./
 
@@ -29,6 +31,10 @@ RUN npm ci --only=production
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
 
+COPY server.js ./
+COPY migrations.sql ./
+
+
 # --- CORREÇÃO AQUI EM BAIXO ---
 # Copia a pasta JS onde está o admin.js
 COPY --from=builder /app/public/js ./dist/js
@@ -36,8 +42,6 @@ COPY --from=builder /app/public/js ./dist/js
 # Copy images folder to dist
 COPY --from=builder /app/public/images ./dist/images
 
-# Copy server file
-COPY server.js ./
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs && \
