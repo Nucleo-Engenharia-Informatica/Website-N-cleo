@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import pkg from 'pg';
 import nodemailer from 'nodemailer';
+import fs from 'fs';
 
 const { Pool } = pkg;
 
@@ -20,6 +21,23 @@ const pool = new Pool({
     ? { rejectUnauthorized: false }
     : false
 });
+
+const runMigrations = async () => {
+  try {
+    const sqlPath = join(__dirname, 'migrations.sql');
+    
+    if (fs.existsSync(sqlPath)) {
+      const sql = fs.readFileSync(sqlPath, 'utf8');
+      await pool.query(sql);
+      console.log('✅ Base de Dados: Tabelas e colunas verificadas/criadas com sucesso.');
+    } else {
+      console.warn('⚠️ Aviso: migrations.sql não encontrado. A criação automática de tabelas foi ignorada.');
+    }
+  } catch (err) {
+    console.error('❌ Erro crítico ao executar migrações automáticas:', err.message);
+    // Não paramos o servidor, mas o log avisará o professor se algo falhar na BD
+  }
+};
 
 // Test DB Connection
 pool.query('SELECT NOW()', (err, res) => {
@@ -259,7 +277,14 @@ app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
-// Iniciar Servidor
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// Em vez de ligar o servidor logo, garantimos que as migrações correm primeiro.
+const startServer = async () => {
+  // Executa a verificação/criação das tabelas antes de aceitar conexões
+  await runMigrations(); 
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor autónomo a correr na porta ${PORT}`);
+  });
+};
+
+startServer();
