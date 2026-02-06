@@ -44,115 +44,115 @@ function getMembrosReais() {
     {
       id: 'membro-1',
       name: 'Diogo Vicente',
-      cover: '/images/Diogo Vicente.jpeg', 
+      cover: '/images/Diogo Vicente.webp', 
+      fallback: '/images/Diogo Vicente.jpeg',
       github: 'https://github.com/DiogoVicente8',
       linkedin: 'https://www.linkedin.com/in/diogo-vicente-b2202b31a/'
     },
     {
       id: 'membro-2',
       name: 'Pedro Rodrigues',
-      cover: '/images/Pedro Rodrigues.jpeg',
+      cover: '/images/Pedro Rodrigues.webp',
+      fallback: '/images/Pedro Rodrigues.jpeg',
       github: 'https://github.com/PedroRodrigues006',
       linkedin: 'https://www.linkedin.com/in/pedro-rodrigues-128b073a1/'
     },
     {
       id: 'membro-3',
       name: 'Guilherme Taipa',
-      cover: '/images/Guilherme Taipa.jpeg',
+      cover: '/images/Guilherme Taipa.webp',
+      fallback: '/images/Guilherme Taipa.jpeg',
       github: 'https://github.com/2024118263-gif',
       linkedin: 'https://www.linkedin.com/in/guilherme-taipa-3b88673a3/'
     },
     {
       id: 'membro-4',
       name: 'Tiago Chousal',
-      cover: '/images/tiago-chousal.png',
+      cover: '/images/tiago-chousal.webp',
+      fallback: '/images/tiago-chousal.jpeg',
       github: 'https://github.com/2024118263-gif',
       linkedin: 'https://www.linkedin.com/in/tiago-chousal-aa03ba389/'
     },
     {
       id: 'membro-5',
       name: 'Diogo Borges',
-      cover: '/images/Diogo Borges.jpeg',
+      cover: '/images/Diogo Borges.webp',
+      fallback: '/images/Diogo Borges.jpeg',
       github: 'https://github.com/DBorges11',
       linkedin: 'https://www.linkedin.com/in/diogo-borges-335516393/'
     },
     {
       id: 'membro-6',
-      name: 'Pedro Ramos ',
-      cover: '/images/pedro_ramos.jpeg',
+      name: 'Pedro Ramos',
+      cover: '/images/pedro_ramos.webp',
+      fallback: '/images/pedro_ramos.jpeg',
       github: 'https://github.com/Ricardo132-maker',
-      linkedin: 'https://www.linkedin.com/in/ricardo-ramos-4739a3295?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+      linkedin: 'https://www.linkedin.com/in/ricardo-ramos-4739a3295'
     }, 
-     {
+    {
       id: 'membro-7',
       name: 'João Reis',
-      cover: '/images/joao_reis.jpeg',
+      cover: '/images/joao_reis.webp',
+      fallback: '/images/joao_reis.jpeg',
       github: 'https://github.com/joaoreis2121',
       linkedin: 'http://linkedin.com/in/joão-reis-50549a38a'
     }, 
-    /* {
-      id: 'membro-8',
-      name: 'Tiago Durães',
-      cover: 'https://picsum.photos/seed/pedro/360/360',
-      github: 'https://github.com/IDuraess',
-    }, */
-     {
+    {
       id: 'membro-9',
       name: 'Rayssa Santos',
-      cover: '/images/Rayssa Santos.png',
-      github: 'https://github.com/rcs-raysantos ',
+      cover: '/images/Rayssa Santos.webp',
+      fallback: '/images/Rayssa Santos.png',
+      github: 'https://github.com/rcs-raysantos',
       linkedin:'https://www.linkedin.com/in/rayssa-santos-a452803a9'
     }, 
-     {
+    {
       id: 'membro-10',
       name: 'Filipe Silva',
-      cover: '/images/Filipe Silva.png',
+      cover: '/images/Filipe Silva.webp',
+      fallback: '/images/Filipe Silva.png',
       github: 'https://github.com/FilipeSilva23',
-      linkedin:'https://www.linkedin.com/in/filipe-correia-de-almeida-silva-9468b53a9?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app'
+      linkedin:'https://www.linkedin.com/in/filipe-correia-de-almeida-silva-9468b53a9'
     },
     {
       id: 'membro-11',
       name: 'Winnie Martins',
-      cover: '/images/Winnie Martins.png',
+      cover: '/images/Winnie Martins.webp',
+      fallback: '/images/Winnie Martins.png',
       github: 'https://github.com/ViniMartins114158',
       linkedin:'https://www.linkedin.com/in/winnie-martins-b8886b3a8/'
-
     }, 
     {
       id: 'membro-12',
       name: 'Leonardo Cunha',
-      cover: '/images/Leonardo Cunha.jpeg',
+      cover: '/images/Leonardo Cunha.webp',
+      fallback: '/images/Leonardo Cunha.jpeg',
       github: 'https://github.com/2025111409-del',
-      linkedin:'https://www.linkedin.com/in/leonardo-cunha-moura-73b1293a6?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BEhLAOItzSxOHKD5r2Bo3Qg%3D%3D'
+      linkedin:'https://www.linkedin.com/in/leonardo-cunha-moura-73b1293a6'
     },
-    /* {
-      id: 'membro-13',
-      name: 'Diogo Oliveira',
-      cover: 'https://picsum.photos/seed/pedro/360/360',
-      github: 'https://github.com/DiogoOliveira04ufp',
-    }, */
     {
       id: 'membro-14',
       name: 'Ricardo Pereira',
-      cover: '/images/Ricardo Pereira.jpeg',
-      github: ' https://github.com/RicPerUFP',
-      linkedin:'https://www.linkedin.com/in/ricardo-pereira-b9321836a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app'
+      cover: '/images/Ricardo Pereira.webp',
+      fallback: '/images/Ricardo Pereira.jpeg',
+      github: 'https://github.com/RicPerUFP',
+      linkedin:'https://www.linkedin.com/in/ricardo-pereira-b9321836a'
     },
     {
       id: 'membro-15',
       name: 'Robi Henrquez',
-      cover: '/images/Robi Henrquez.jpeg',
-      github: ' https://github.com/Marcelrobi1https://github.com/Marcelrobi1',
-      linkedin:'https://www.linkedin.com/in/robi-henrquez-32829a16a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app' 
+      cover: '/images/Robi Henrquez.webp',
+      fallback: '/images/Robi Henrquez.jpeg',
+      github: 'https://github.com/Marcelrobi1',
+      linkedin:'https://www.linkedin.com/in/robi-henrquez-32829a16a' 
     },
     {
       id: 'membro-16',
-      name: 'Dione Arantes ',
-      cover: '/images/Dione Arantes.jpeg',
-      github: ' https://github.com/EngArantes',
-      linkedin:'https://www.linkedin.com/in/dione-amaral-arantes-830323117?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app' 
-    },
-
+      name: 'Dione Arantes',
+      cover: '/images/Dione Arantes.webp',
+      fallback: '/images/Dioen Arantes.jpeg',
+      github: 'https://github.com/EngArantes',
+      linkedin:'https://www.linkedin.com/in/dione-amaral-arantes-830323117' 
+    }
   ];
 }
 
@@ -165,7 +165,6 @@ function initQuemSomos() {
     const teamGrid = document.getElementById('team-lista');
     if (!teamGrid) return;
 
-    // Carrega a lista manual
     const membros = getMembrosReais();
     renderMembros(membros);
 }
@@ -179,9 +178,14 @@ function renderMembros(lista) {
         const card = document.createElement('article');
         card.className = 'card reveal-on-scroll'; 
         
-        // Aqui usamos as tuas variáveis: cover, name, cargo, links
+        // A lógica do onerror tenta .jpg, se falhar tenta .png, se falhar para.
         card.innerHTML = `
-            <img src="${membro.cover}" alt="${membro.name}" style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+            <img 
+                src="${membro.cover}" 
+                alt="${membro.name}" 
+                style="width: 100%; aspect-ratio: 1/1; object-fit: cover;"
+                onerror="this.onerror=null; this.src='${membro.cover.replace('.webp', '.jpeg')}';"
+            >
             <div class="card-body">
                 <h3>${membro.name}</h3>
                 <p class="muted">${membro.cargo || 'Membro do Núcleo'}</p>
@@ -192,7 +196,7 @@ function renderMembros(lista) {
                     </a>` : ''}
                     
                     ${membro.github ? `
-                    <a href="${membro.github}" target="_blank" aria-label="GitHub" style="color: inherit; font-size: 1.2rem;">
+                    <a href="${membro.github.trim()}" target="_blank" aria-label="GitHub" style="color: inherit; font-size: 1.2rem;">
                         <i class="fa-brands fa-github"></i>
                     </a>` : ''}
                 </div>
@@ -204,7 +208,7 @@ function renderMembros(lista) {
     });
 }
 
-// --- 4. CONFIGURAÇÕES GERAIS (Dark Mode, Menu, Background) ---
+// --- 4. CONFIGURAÇÕES GERAIS ---
 const menuToggle = document.querySelector('.menu-toggle');
 const siteNav = document.querySelector('.site-nav');
 if (menuToggle && siteNav) {
@@ -227,7 +231,6 @@ function initThemeToggle() {
   });
 }
 
-// Fundo Animado (Canvas)
 function initBackground() {
   const c = document.getElementById('bg-canvas');
   if (!c) return;
@@ -258,7 +261,6 @@ function initBackground() {
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Linhas
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
@@ -281,5 +283,5 @@ document.addEventListener('DOMContentLoaded', () => {
   applyLangToDom();
   initLangToggle();
   initBackground();
-  initQuemSomos(); // Chama a tua lista manual
+  initQuemSomos();
 });

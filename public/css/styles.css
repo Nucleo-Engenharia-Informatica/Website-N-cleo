@@ -200,7 +200,7 @@ body.dark-mode .bg-canvas { opacity: 0.55; mix-blend-mode: screen; }
 .site-nav a:active { color: var(--text); background: transparent; }
 .site-nav a:focus { outline: none; }
 .site-nav a:hover { background: rgba(0, 217, 163, 0.1); color: var(--primary-dark); }
-.site-nav a.active { background: var(--primary); color: white; font-weight: 600; }
+.site-nav a.active { background: var(--primary); color: rgb(0, 0, 0); font-weight: 600; }
 .site-nav .cta { background: var(--primary); color: #0d1117; font-weight: 600; }
 .site-nav .cta:hover { background: var(--primary-dark); color: #0d1117; box-shadow: 0 4px 12px rgba(0, 217, 163, 0.3); }
 /* align PT/EN button with nav items */
@@ -502,4 +502,9 @@ body.dark-mode .dark-only {
   .nav-logo {
     height: 45px;
   }
+}
+body.dark-mode .site-nav a.active,
+body.dark-mode .site-nav a.cta {
+  color: #000000 !important;
+  background-color: var(--primary);
 }
