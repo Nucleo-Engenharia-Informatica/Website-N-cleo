@@ -179,7 +179,9 @@
         /* Mobile adjustments */
         @media (max-width: 768px) {
             .sidebar { width: 60px; padding: 1rem 0.5rem; }
-            .brand-admin span, .nav-item span { display: none; }
+            .brand-admin span{display: none;} 
+            .nav-item span:nth-child(2) { display: none; }
+            .nav-item span:first-child { display: block !important; font-size: 1.6rem !important; }
             .main-content { margin-left: 60px; padding: 1.5rem; }
             .nav-item { justify-content: center; }
             .brand-admin { text-align: center; padding: 0; font-size: 1.2rem; }
