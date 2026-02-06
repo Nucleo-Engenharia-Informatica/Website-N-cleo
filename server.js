@@ -17,7 +17,6 @@ const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
 // Database connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  database: process.env.DB_NAME || 'nucleo_db',
   ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('neon.tech')
     ? { rejectUnauthorized: false }
     : false
@@ -280,15 +279,10 @@ app.get('*', (req, res) => {
 
 // Em vez de ligar o servidor logo, garantimos que as migrações correm primeiro.
 const startServer = async () => {
-  // 1. Iniciamos a verificação mas NÃO bloqueamos o fluxo
-  runMigrations().catch(err => {
-    // Se falhar, apenas avisamos no log. O servidor não morre.
-    console.error("⚠️ Migrações em background: A aguardar estabilidade da BD...");
-  });
+  // Executa a verificação/criação das tabelas antes de aceitar conexões
+  await runMigrations(); 
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor autónomo a correr na porta ${PORT}`);
   });
 };
-
-startServer();
