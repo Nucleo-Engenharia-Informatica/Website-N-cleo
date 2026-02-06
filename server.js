@@ -286,3 +286,5 @@ const startServer = async () => {
     console.log(`🚀 Servidor autónomo a correr na porta ${PORT}`);
   });
 };
+
+startServer();
