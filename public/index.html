@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/styles.css" />
     <link rel="stylesheet" href="css/form.css">
     </head>
@@ -23,7 +24,7 @@
         </button>
         <nav class="site-nav" aria-label="Principal">
           <ul>
-            <li><a href="/quem.html"  data-i18n="nav.quem">Quem Somos</a></li>
+            <li><a href="#quem" data-i18n="nav.quem">Quem Somos</a></li>
             <li><a href="#fazemos" data-i18n="nav.fazemos">O que Fazemos</a></li>
             <li><a href="#sobre" data-i18n="nav.sobre">Sobre o Curso</a></li>
             <li><a href="#noticias" data-i18n="nav.noticias">Notícias e Eventos</a></li>
@@ -50,7 +51,13 @@
         <div class="bg-animated"></div>
       </section>
 
-      
+      <section id="quem" class="section">
+        <div class="container">
+          <h2 class="section-title reveal-on-scroll" data-i18n="section.quem.title">Quem Somos</h2>
+          <p class="section-subtitle reveal-on-scroll" data-i18n="section.quem.sub">Estudantes apaixonados por tecnologia que dinamizam a comunidade de Engenharia Informática da UFP.</p>
+          <div class="grid team-grid" id="team-lista"></div>
+        </div>
+      </section>
 
       <section id="fazemos" class="section alt">
         <div class="container">

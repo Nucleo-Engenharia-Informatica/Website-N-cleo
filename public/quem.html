@@ -2,67 +2,12 @@
 <html lang="pt">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quem somos — Núcleo de Engenharia Informática</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- A secção "Quem Somos" passou para a página principal; mantém os links antigos a funcionar -->
+    <meta http-equiv="refresh" content="0; url=/index.html#quem" />
+    <script>location.replace('/index.html#quem');</script>
   </head>
   <body>
-    <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
-    <header class="site-header">
-      <div class="container nav-container">
-        <a class="brand" href="/index.html#top">
-          <img src="NIUFP-Logo.png" alt="Núcleo EI" class="nav-logo">
-        </a>
-        <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-        <nav class="site-nav" aria-label="Principal">
-          <ul>
-            <li><a href="/quem.html" class="cta active" data-i18n="nav.quem">Quem Somos</a></li>
-            <li><a href="/index.html#fazemos" data-i18n="nav.fazemos">O que Fazemos</a></li>
-            <li><a href="/index.html#sobre" data-i18n="nav.sobre">Sobre o Curso</a></li>
-            <li><a href="/index.html#noticias" data-i18n="nav.noticias">Notícias e Eventos</a></li>
-            <li><a href="/index.html#contactos" class="cta" data-i18n="nav.contactos">Contactos</a></li>
-            <li><button id="theme-toggle" class="btn small icon-btn" aria-label="Toggle dark mode">
-              <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-              </svg>
-              <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </button></li>
-            <li><button id="lang-toggle" class="btn small">PT/EN</button></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
-
-    <main>
-      <section class="hero hero-atrio">
-        <div class="container hero-center">
-          <h1 class="hero-title" data-i18n="page.quem.hero">A Nossa Equipa</h1>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <h2 class="section-title reveal-on-scroll" data-i18n="page.quem.title">Membros do Núcleo</h2>
-          <p class="section-subtitle reveal-on-scroll" data-i18n="page.quem.subtitle">Estudantes apaixonados por tecnologia que dinamizam a comunidade de Engenharia Informática da UFP.</p>
-          <div class="grid team-grid" id="team-lista"></div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="container">
-        <p>© 2025 Núcleo de Engenharia Informática — Universidade Fernando Pessoa</p>
-      </div>
-    </footer>
-
-    <script type="module" src="/js/quem.js"></script>
+    <p><a href="/index.html#quem">Quem Somos</a></p>
   </body>
-  </html>
+</html>

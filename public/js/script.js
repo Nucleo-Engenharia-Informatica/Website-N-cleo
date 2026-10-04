@@ -1,4 +1,5 @@
 import { events } from './events.js';
+import { membros } from './membros.js';
 
 // --- 0. Carregamento Dinâmico do reCAPTCHA (Solução "Sem Variáveis Mágicas") ---
 async function carregarReCaptcha() {
@@ -71,6 +72,9 @@ const i18n = {
     'nav.noticias': 'Notícias e Eventos',
     'nav.contactos': 'Contactos',
     'hero.title': 'Núcleo de Engenharia Informática da Universidade Fernando Pessoa',
+    'section.quem.title': 'Quem Somos',
+    'section.quem.sub': 'Estudantes apaixonados por tecnologia que dinamizam a comunidade de Engenharia Informática da UFP.',
+    'label.member': 'Membro do Núcleo',
     'section.fazemos.title': 'O que Fazemos',
     'section.fazemos.sub': 'Workshops práticos, hackathons desafiantes, talks inspiradoras e convívios que fortalecem a nossa comunidade.',
     'features.workshops.title': 'Workshops Práticos',
@@ -117,6 +121,9 @@ const i18n = {
     'nav.noticias': 'News',
     'nav.contactos': 'Contact us',
     'hero.title': 'Computer Engineering Student Society — Universidade Fernando Pessoa',
+    'section.quem.title': 'Who we are',
+    'section.quem.sub': 'Technology-passionate students who drive the UFP Computer Engineering community.',
+    'label.member': 'Nucleus Member',
     'section.fazemos.title': 'What we do',
     'section.fazemos.sub': 'Workshops, hackathons, talks and community events.',
     'features.workshops.title': 'Workshops',
@@ -170,6 +177,7 @@ function initLangToggle() {
     localStorage.setItem('lang', next);
     applyLangToDom();
     renderHomepage(events);
+    renderMembros(membros);
   });
 }
 
@@ -321,8 +329,46 @@ function renderHomepage(list) {
     renderEvents([...list, ...getHomepageNews()]); 
 }
 
+// --- Quem Somos (membros) ---
+function renderMembros(lista) {
+  const teamGrid = document.getElementById('team-lista');
+  if (!teamGrid) return;
+  teamGrid.innerHTML = '';
+
+  lista.forEach(membro => {
+    const card = document.createElement('article');
+    card.className = 'card reveal-on-scroll';
+    card.innerHTML = `
+      <img
+        src="${membro.cover}"
+        alt="${membro.name}"
+        loading="lazy"
+        style="width: 100%; aspect-ratio: 1/1; object-fit: cover;"
+        onerror="this.onerror=null; this.src='${membro.fallback || membro.cover.replace('.webp', '.jpeg')}';"
+      >
+      <div class="card-body">
+        <h3>${membro.name}</h3>
+        <p class="muted">${membro.cargo || t('label.member')}</p>
+        <div class="social-links" style="margin-top: 12px; display: flex; gap: 15px; justify-content: center;">
+          ${membro.linkedin ? `
+          <a href="${membro.linkedin}" target="_blank" rel="noopener" aria-label="LinkedIn" style="color: inherit; font-size: 1.2rem;">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>` : ''}
+          ${membro.github ? `
+          <a href="${membro.github.trim()}" target="_blank" rel="noopener" aria-label="GitHub" style="color: inherit; font-size: 1.2rem;">
+            <i class="fa-brands fa-github"></i>
+          </a>` : ''}
+        </div>
+      </div>
+    `;
+    teamGrid.appendChild(card);
+    observer.observe(card);
+  });
+}
+
 // Inicializações
 renderHomepage(events);
+renderMembros(membros);
 applyLangToDom();
 initLangToggle();
 
