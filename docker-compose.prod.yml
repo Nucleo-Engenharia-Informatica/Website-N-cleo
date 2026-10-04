@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: nucleo-postgres
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -21,7 +21,7 @@ services:
   app:
     image: ${DOCKERHUB_USERNAME}/nucleo-ei-ufp:latest
     container_name: nucleo-app
-    restart: unless-stopped
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,7 +51,7 @@ services:
   watchtower:
     image: containrrr/watchtower
     container_name: nucleo-watchtower
-    restart: unless-stopped
+    restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
