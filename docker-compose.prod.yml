@@ -51,6 +51,7 @@ services:
       start_period: 40s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.scope=nucleo"
 
   watchtower:
     image: containrrr/watchtower
@@ -60,11 +61,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=30
+      - WATCHTOWER_POLL_INTERVAL=300
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=${WATCHTOWER_NOTIFICATION_URL:-}
+      - WATCHTOWER_SCOPE=nucleo
+      # O Docker 29 exige API >= 1.40; a imagem da watchtower usa 1.25 por omissão.
+      - DOCKER_API_VERSION=1.43
+    labels:
+      - "com.centurylinklabs.watchtower.scope=nucleo"
     networks:
       - nucleo-network
 
