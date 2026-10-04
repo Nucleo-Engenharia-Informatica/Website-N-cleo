@@ -54,7 +54,7 @@ services:
       - "com.centurylinklabs.watchtower.scope=nucleo"
 
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower:1
     container_name: nucleo-watchtower
     restart: always
     volumes:
@@ -65,8 +65,6 @@ services:
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
       - WATCHTOWER_SCOPE=nucleo
-      # O Docker 29 exige API >= 1.40; a imagem da watchtower usa 1.25 por omissão.
-      - DOCKER_API_VERSION=1.43
     labels:
       - "com.centurylinklabs.watchtower.scope=nucleo"
     networks:
