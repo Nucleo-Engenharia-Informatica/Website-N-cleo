@@ -21,6 +21,7 @@ services:
   app:
     image: ${DOCKERHUB_USERNAME}/nucleo-ei-ufp:latest
     container_name: nucleo-app
+    init: true  # o processo principal (PID 1) ignora o SIGTERM; o init reencaminha-o
     restart: always
     depends_on:
       postgres:
