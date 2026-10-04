@@ -35,12 +35,16 @@ services:
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USER: ${SMTP_USER}
       SMTP_PASS: ${SMTP_PASS}
+    # Espera que o Postgres aceite ligações antes de arrancar. O depends_on só
+    # é respeitado pelo "docker compose up"; quando o daemon do Docker reinicia
+    # os contentores (restart: always) ignora-o e a app arrancava sem BD.
+    command: ["sh", "-c", "until nc -z postgres 5432; do echo 'À espera do Postgres...'; sleep 2; done; exec node server.js"]
     ports:
       - "8892:3000"
     networks:
       - nucleo-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
