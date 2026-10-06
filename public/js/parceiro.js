@@ -193,3 +193,6 @@ function initBackground() {
 }
 
 initBackground();
+
+// Ano atual no rodapé
+document.querySelectorAll('.ano-atual').forEach(el => { el.textContent = new Date().getFullYear(); });

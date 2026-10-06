@@ -662,3 +662,6 @@ async function enviarPedido() {
         btn.disabled = false;
     }
 }
+
+// Ano atual no rodapé
+document.querySelectorAll('.ano-atual').forEach(el => { el.textContent = new Date().getFullYear(); });
