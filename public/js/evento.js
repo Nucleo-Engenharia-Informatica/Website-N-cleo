@@ -55,7 +55,8 @@ function applyLangToDom() {
   document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.getAttribute('data-i18n')); if (v) el.textContent = v; });
   applyCommonLang();
 }
-function initLangToggle() { initCommonLangToggle(() => location.reload()); }
+// Mudar de idioma volta a desenhar o conteúdo (sem recarregar a página)
+function initLangToggle() { initCommonLangToggle(renderPage); }
 
 initMenu();
 initThemeToggle();
@@ -112,7 +113,13 @@ function renderAgenda(list, selectedId) {
   });
 }
 
+// O detalhe cria um lightbox no <body>, um atalho de teclado e um carrossel;
+// ao voltar a desenhar (troca de idioma) é preciso desfazê-los primeiro.
+let detailCleanup = null;
+
 function renderDetail(ev) {
+  detailCleanup?.();
+  detailCleanup = null;
   const root = document.getElementById('evento-detalhe');
   root.innerHTML = '';
   if (!ev) {
@@ -248,7 +255,7 @@ function renderDetail(ev) {
   nextBtn.addEventListener('click', (e) => { e.stopPropagation(); showNextImage(); });
 
   // Keyboard navigation
-  document.addEventListener('keydown', (e) => {
+  const onKey = (e) => {
     if (!lb.classList.contains('open')) return;
     if (e.key === 'ArrowLeft') showPrevImage();
     else if (e.key === 'ArrowRight') showNextImage();
@@ -260,7 +267,15 @@ function renderDetail(ev) {
       e.preventDefault();
       items[(i + (e.shiftKey ? -1 : 1) + items.length) % items.length].focus();
     }
-  });
+  };
+  document.addEventListener('keydown', onKey);
+
+  detailCleanup = () => {
+    stopCarousel(true);
+    document.removeEventListener('keydown', onKey);
+    lb.remove();
+    document.body.style.overflow = '';
+  };
 
   body.appendChild(h2);
   body.appendChild(meta);
@@ -277,12 +292,16 @@ function renderDetail(ev) {
 
 function getIdFromQuery() { return new URLSearchParams(window.location.search).get('id'); }
 
-function init() {
+function renderPage() {
   const id = getIdFromQuery();
   const ev = events.find(e => e.id === id);
   renderDetail(ev);
   renderAgenda(events, id);
   applyLangToDom();
+}
+
+function init() {
+  renderPage();
   initLangToggle();
   initFooterYear();
 }
