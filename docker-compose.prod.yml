@@ -41,7 +41,7 @@ services:
     # os contentores (restart: always) ignora-o e a app arrancava sem BD.
     command: ["sh", "-c", "until nc -z postgres 5432; do echo 'À espera do Postgres...'; sleep 2; done; exec node server.js"]
     ports:
-      - "8892:3000"
+      - "127.0.0.1:8892:3000"
     networks:
       - nucleo-network
     healthcheck:
