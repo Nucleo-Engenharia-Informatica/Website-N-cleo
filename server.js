@@ -4,6 +4,7 @@ import { dirname, join } from 'path';
 import pkg from 'pg';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const { Pool } = pkg;
 
@@ -13,6 +14,10 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY; 
+const ADMIN_PASS = process.env.ADMIN_PASS || (process.env.NODE_ENV === 'production' ? null : '1234');
+if (!ADMIN_PASS) {
+  console.error('❌ ADMIN_PASS não definido: o login do admin fica desativado.');
+}
 
 // Database connection
 const pool = new Pool({
@@ -71,34 +76,117 @@ if (process.env.SMTP_HOST) {
 }
 
 // Middleware
+// O nginx está à frente da app (um proxy): req.ip passa a ser o IP do cliente
+// que o nginx acrescenta ao X-Forwarded-For.
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS (apenas para desenvolvimento local)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
+// --- SESSÃO DO ADMIN ---
+// Cookie httpOnly assinado com HMAC: "<expira em ms>.<assinatura>".
+// O segredo é gerado no arranque, por isso um restart termina as sessões.
+const SESSION_COOKIE = 'nei_admin';
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const SESSION_SECRET = crypto.randomBytes(32);
+
+const sign = (value) => crypto.createHmac('sha256', SESSION_SECRET).update(value).digest('base64url');
+
+const safeEqual = (a, b) => {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+};
+
+const getCookie = (req, name) => {
+  const header = req.headers.cookie || '';
+  for (const part of header.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return decodeURIComponent(v.join('='));
+  }
+  return null;
+};
+
+const isAdmin = (req) => {
+  const token = getCookie(req, SESSION_COOKIE);
+  if (!token) return false;
+  const [expires, sig] = token.split('.');
+  if (!expires || !sig || !safeEqual(sig, sign(expires))) return false;
+  return Number(expires) > Date.now();
+};
+
+const requireAdmin = (req, res, next) => {
+  if (isAdmin(req)) return next();
+  res.status(401).json({ message: 'Sessão inválida ou expirada.' });
+};
+
+const cookieOptions = () => ({
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  path: '/api',
 });
+
+// Limite de tentativas de login falhadas por IP (em memória).
+const LOGIN_MAX_FAILS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const loginFails = new Map();
+
+const loginBlocked = (ip) => {
+  const entry = loginFails.get(ip);
+  if (!entry) return false;
+  if (Date.now() - entry.first > LOGIN_WINDOW_MS) {
+    loginFails.delete(ip);
+    return false;
+  }
+  return entry.count >= LOGIN_MAX_FAILS;
+};
+
+const registerLoginFail = (ip) => {
+  const entry = loginFails.get(ip);
+  if (!entry || Date.now() - entry.first > LOGIN_WINDOW_MS) {
+    loginFails.set(ip, { count: 1, first: Date.now() });
+  } else {
+    entry.count++;
+  }
+};
+
+const escapeHtml = (str) => String(str)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
 
 // --- API ROUTES ---
 
-// 1. Rota de Login Admin (NOVO)
+// 1. Login / Logout / Sessão do Admin
 app.post('/api/login', (req, res) => {
-    const { password } = req.body;
-    
-    // O TRUQUE: Tenta ler do servidor. Se não existir, usa '1234'.
-    // Assim, no teu PC funciona sempre com '1234'.
-    // No servidor online, configuras a variável ADMIN_PASS com uma senha difícil.
-    const serverPassword = process.env.ADMIN_PASS || '1234';
+  const ip = req.ip;
+  if (loginBlocked(ip)) {
+    console.warn(`🔒 Login bloqueado (demasiadas tentativas): ${ip}`);
+    return res.status(429).json({ success: false, message: 'Demasiadas tentativas. Tente mais tarde.' });
+  }
 
-    if (password === serverPassword) {
-        res.json({ success: true });
-    } else {
-        res.status(401).json({ success: false, message: 'Password incorreta' });
-    }
+  const { password } = req.body || {};
+  if (!ADMIN_PASS || typeof password !== 'string' || !safeEqual(password, ADMIN_PASS)) {
+    registerLoginFail(ip);
+    console.warn(`🔒 Login falhado: ${ip}`);
+    return res.status(401).json({ success: false, message: 'Password incorreta' });
+  }
+
+  loginFails.delete(ip);
+  const expires = String(Date.now() + SESSION_TTL_MS);
+  res.cookie(SESSION_COOKIE, `${expires}.${sign(expires)}`, { ...cookieOptions(), maxAge: SESSION_TTL_MS });
+  res.json({ success: true });
+});
+
+app.post('/api/logout', (req, res) => {
+  res.clearCookie(SESSION_COOKIE, cookieOptions());
+  res.json({ success: true });
+});
+
+app.get('/api/session', (req, res) => {
+  res.json({ authenticated: isAdmin(req) });
 });
 
 
@@ -115,14 +203,22 @@ app.post('/api/ajuda', async (req, res) => {
     const { text, email, captcha } = req.body;
 
     // Validações
-    if (!text || !email) {
+    if (typeof text !== 'string' || typeof email !== 'string' || !text.trim() || !email.trim()) {
       return res.status(400).json({ message: 'Texto e email são obrigatórios.' });
     }
+    if (text.length > 5000 || email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email.trim())) {
+      return res.status(400).json({ message: 'Dados inválidos.' });
+    }
 
-    // Verificar ReCaptcha com a Google
-    if (RECAPTCHA_SECRET && captcha) {
-        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET}&response=${captcha}`;
-        const googleRes = await fetch(verifyUrl, { method: 'POST' });
+    // Verificar ReCaptcha com a Google (obrigatório quando há secret configurado)
+    if (RECAPTCHA_SECRET) {
+        if (typeof captcha !== 'string' || !captcha) {
+            return res.status(400).json({ message: 'Verificação de segurança em falta.' });
+        }
+        const googleRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+            method: 'POST',
+            body: new URLSearchParams({ secret: RECAPTCHA_SECRET, response: captcha, remoteip: req.ip }),
+        });
         const googleData = await googleRes.json();
         if (!googleData.success || googleData.score < 0.5) {
             console.warn('Bot bloqueado pelo Recaptcha:', googleData);
@@ -135,19 +231,19 @@ app.post('/api/ajuda', async (req, res) => {
       `INSERT INTO pedidos_ajuda (texto, email, data_envio, status)
        VALUES ($1, $2, $3, $4)
        RETURNING id`,
-      [text, email, new Date().toISOString(), 'pending']
+      [text.trim(), email.trim(), new Date().toISOString(), 'pending']
     );
 
     res.status(200).json({ message: 'Pedido enviado!', id: result.rows[0].id });
 
   } catch (error) {
     console.error('Erro no pedido de ajuda:', error);
-    res.status(500).json({ message: 'Erro interno.', error: error.message });
+    res.status(500).json({ message: 'Erro interno.' });
   }
 });
 
 // 3. Listar Pedidos (Para o Admin)
-app.get('/api/pedidos', async (req, res) => {
+app.get('/api/pedidos', requireAdmin, async (req, res) => {
   try {
     // Agora incluímos o email na seleção
     const result = await pool.query(
@@ -156,15 +252,16 @@ app.get('/api/pedidos', async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Erro ao listar pedidos:', error);
+    res.status(500).json({ error: 'Erro interno.' });
   }
 });
 
 // 4. Responder a Pedido (COM ENVIO DE EMAIL)
-app.post('/api/responder', async (req, res) => {
+app.post('/api/responder', requireAdmin, async (req, res) => {
   try {
     const { id, resposta } = req.body;
-    if (!id || !resposta) return res.status(400).json({ message: 'Dados incompletos.' });
+    if (!id || typeof resposta !== 'string' || !resposta.trim()) return res.status(400).json({ message: 'Dados incompletos.' });
 
     // PASSO A: Buscar o email e a pergunta original
     const pedidoQuery = await pool.query('SELECT email, texto FROM pedidos_ajuda WHERE id = $1', [id]);
@@ -194,12 +291,12 @@ app.post('/api/responder', async (req, res) => {
                 
                 <div style="background-color: #f6f8fa; padding: 15px; border-left: 4px solid #00d9a3; margin: 20px 0;">
                     <small style="color: #666; display: block; margin-bottom: 5px;">A tua pergunta:</small>
-                    <em style="color: #24292f;">"${perguntaOriginal}"</em>
+                    <em style="color: #24292f;">"${escapeHtml(perguntaOriginal).replace(/\n/g, '<br>')}"</em>
                 </div>
 
                 <h3>A nossa resposta:</h3>
                 <p style="font-size: 16px; line-height: 1.6; color: #24292f;">
-                    ${resposta.replace(/\n/g, '<br>')}
+                    ${escapeHtml(resposta).replace(/\n/g, '<br>')}
                 </p>
                 
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
@@ -232,7 +329,7 @@ app.post('/api/responder', async (req, res) => {
     console.error("❌ Erro ao responder:", error);
     // Garantir que enviamos apenas uma resposta de erro se algo falhar
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Erro ao enviar email ou guardar na BD.', details: error.message });
+      res.status(500).json({ error: 'Erro ao enviar email ou guardar na BD.' });
     }
   }
 });
@@ -240,14 +337,17 @@ app.post('/api/responder', async (req, res) => {
     
 
 // 5. Perfil Admin (Ler e Atualizar)
-app.get('/api/usuarios', async (req, res) => {
+app.get('/api/usuarios', requireAdmin, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM usuarios LIMIT 1');
         res.json(result.rows);
-    } catch (e) { res.status(500).json({error: e.message}); }
+    } catch (e) {
+        console.error('Erro ao ler perfil:', e);
+        res.status(500).json({ error: 'Erro interno.' });
+    }
 });
 
-app.put('/api/usuarios', async (req, res) => {
+app.put('/api/usuarios', requireAdmin, async (req, res) => {
     try {
         const { nome, linkedin_url, instagram_url } = req.body;
         // Assume que existe um user com ID 1
@@ -256,7 +356,10 @@ app.put('/api/usuarios', async (req, res) => {
             [nome, linkedin_url, instagram_url]
         );
         res.json({ message: 'Perfil atualizado' });
-    } catch (e) { res.status(500).json({error: e.message}); }
+    } catch (e) {
+        console.error('Erro ao atualizar perfil:', e);
+        res.status(500).json({ error: 'Erro interno.' });
+    }
 });
 
 // Servir Ficheiros Estáticos (Frontend)
