@@ -148,9 +148,11 @@ function renderPedidos({ pendentes, respondidos }) {
             </div>
             <div class="pedido-text">${escapeHtml(p.texto)}</div>
             <div class="pedido-actions">
+                <label for="reply-${p.id}" class="sr-only">Resposta ao pedido de ${escapeHtml(p.email)}</label>
                 <textarea id="reply-${p.id}" placeholder="Escrever resposta..."></textarea>
-                <button class="btn primary" onclick="responderPedido(${p.id})">Enviar Resposta</button>
-                <div id="status-${p.id}" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
+                <button type="button" class="btn primary" onclick="responderPedido(${p.id}, event)">Enviar Resposta</button>
+                <button type="button" class="btn small" onclick="apagarPedido(${p.id})" style="margin-left: 8px;">Apagar</button>
+                <div id="status-${p.id}" role="status" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
             </div>
         </div>
     `).join('') : '<p style="color:var(--muted)">Nenhum pedido pendente.</p>';
@@ -167,6 +169,7 @@ function renderPedidos({ pendentes, respondidos }) {
                 <p style="color: var(--success); font-weight: bold; margin:0 0 5px 0;">✅ Resposta enviada:</p>
                 <p style="margin:0; white-space: pre-wrap;">${escapeHtml(p.resposta)}</p>
             </div>
+            <button type="button" class="btn small" onclick="apagarPedido(${p.id})" style="margin-top: 1rem;">Apagar</button>
         </div>
     `).join('') : '<p style="color:var(--muted)">Histórico vazio.</p>';
 }
@@ -183,7 +186,7 @@ window.showView = function(viewId, event) {
 };
 
 // Responder a um pedido
-window.responderPedido = async function(id) {
+window.responderPedido = async function(id, event) {
     const textarea = document.getElementById(`reply-${id}`);
     const statusDiv = document.getElementById(`status-${id}`);
     const btn = event.target;
@@ -221,10 +224,24 @@ window.responderPedido = async function(id) {
     }
 };
 
+// Apagar um pedido (RGPD: os dados não precisam de ficar guardados)
+window.apagarPedido = async function(id) {
+    if (!confirm('Apagar este pedido de forma permanente?')) return;
+    try {
+        const res = await apiFetch(`/api/pedidos/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Falha no servidor');
+        inicializarDashboard();
+    } catch (err) {
+        console.error('Erro ao apagar pedido:', err);
+        alert('Não foi possível apagar o pedido.');
+    }
+};
+
 // Gestão de Perfil
+let fotoAtual = null; // data URL da foto (já redimensionada) ou null
 async function loadAdminData() {
     try {
-        const res = await apiFetch('/api/usuarios'); 
+        const res = await apiFetch('/api/usuarios');
         const data = await res.json();
         const user = Array.isArray(data) ? data[0] : data;
 
@@ -232,7 +249,10 @@ async function loadAdminData() {
             document.getElementById('perfil-nome').value = user.nome || '';
             document.getElementById('perfil-insta').value = user.instagram_url || '';
             document.getElementById('perfil-linkedin').value = user.linkedin_url || '';
-            if (user.foto_url) document.getElementById('profile-img-preview').src = user.foto_url;
+            if (user.foto_url) {
+                fotoAtual = user.foto_url;
+                document.getElementById('profile-img-preview').src = user.foto_url;
+            }
 
             // Atualiza o contador de respostas dadas
             const pedidos = await apiFetch('/api/pedidos').then(r => r.json());
@@ -247,21 +267,48 @@ window.saveProfile = async function() {
         nome: document.getElementById('perfil-nome').value,
         instagram_url: document.getElementById('perfil-insta').value,
         linkedin_url: document.getElementById('perfil-linkedin').value,
-        foto_url: document.getElementById('profile-img-preview').src
+        foto_url: fotoAtual
     };
 
-    const res = await apiFetch('/api/usuarios', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-
-    if (res.ok) alert('Perfil atualizado!');
+    try {
+        const res = await apiFetch('/api/usuarios', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+        alert(res.ok ? 'Perfil atualizado!' : (data.error || 'Erro ao guardar o perfil.'));
+    } catch (err) {
+        console.error('Erro ao guardar perfil:', err);
+    }
 };
 
-// Pré-visualização de Foto
-document.getElementById('upload-photo')?.addEventListener('change', function(e) {
-    const reader = new FileReader();
-    reader.onload = () => document.getElementById('profile-img-preview').src = reader.result;
-    reader.readAsDataURL(e.target.files[0]);
+// Foto: redimensionada no browser para 256x256 (WebP) antes de ser enviada,
+// para não ultrapassar o limite do pedido (as fotos de telemóvel têm vários MB)
+function redimensionarFoto(file, size = 256) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            const lado = Math.min(img.width, img.height);
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            canvas.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, size, size);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL('image/webp', 0.85));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagem inválida')); };
+        img.src = url;
+    });
+}
+
+document.getElementById('upload-photo')?.addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+        fotoAtual = await redimensionarFoto(file);
+        document.getElementById('profile-img-preview').src = fotoAtual;
+    } catch (err) {
+        alert('Não foi possível ler a imagem.');
+    }
 });

@@ -16,7 +16,7 @@
   /* Neutrals - Clean & Professional */
   --text: #1a202c;          /* Almost black - better readability */
   --text-light: #2d3748;    /* Lighter text for hierarchy */
-  --muted: #718096;         /* Muted gray for secondary text */
+  --muted: #4a5568;         /* Muted gray for secondary text (contraste AA sobre os fundos claros) */
   --muted-light: #a0aec0;   /* Even lighter for subtle elements */
 
   /* Surfaces & Backgrounds */
@@ -61,6 +61,7 @@ body {
 
 /* Dark Mode Styles */
 body.dark-mode {
+  --muted: var(--dark-text-muted);
   background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1c2128 100%);
   color: var(--dark-text);
 }
@@ -201,7 +202,6 @@ body.dark-mode .bg-canvas { opacity: 0.55; mix-blend-mode: screen; }
 .site-nav a { text-decoration: none; color: var(--text); padding: 10px 12px; border-radius: 10px; }
 .site-nav a:visited { color: var(--text); }
 .site-nav a:active { color: var(--text); background: transparent; }
-.site-nav a:focus { outline: none; }
 .site-nav a:hover { background: rgba(0, 217, 163, 0.1); color: var(--primary-dark); }
 .site-nav a.active { background: var(--primary); color: rgb(0, 0, 0); font-weight: 600; }
 .site-nav .cta { background: var(--primary); color: #0d1117; font-weight: 600; }
@@ -287,7 +287,7 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
 .news-list .news-body p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;line-clamp: 3; }
 .news-meta { color: var(--muted); font-size: 14px; }
 .news-actions { display: flex; gap: 8px; }
-.link-news { background: transparent; border: 0; padding: 0; color: var(--primary); text-decoration: underline; font-weight: 600; height: auto; transition: color 0.2s ease; }
+.link-news { background: transparent; border: 0; padding: 0; color: #006b52; text-decoration: underline; font-weight: 600; height: auto; transition: color 0.2s ease; }
 .link-news:hover { color: var(--primary-dark); }
 
 .contact-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
@@ -347,8 +347,8 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
 .badge-news { background: #FFB020; border-color: rgba(12,16,32,0.1); color: var(--text); font-weight: 600; }
 .badge-overlay { position: absolute; top: 12px; left: 12px; }
 .badge-lg { font-size: 13px; padding: 6px 12px; font-weight: 600; }
-.badge-upcoming { background: var(--success); color: #fff; border-color: var(--success); }
-.badge-tba { background: var(--primary); border-color: var(--primary); color: #fff; }
+.badge-upcoming { background: var(--success); color: #0d1117; border-color: var(--success); }
+.badge-tba { background: var(--primary); border-color: var(--primary); color: #0d1117; }
 
 /* Parallax layers */
 /* parallax removed */
@@ -365,8 +365,9 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
 
 @media (max-width: 880px) {
   .menu-toggle { display: flex; }
-  .site-nav { position: fixed; inset: 64px 0 auto 0; background: var(--surface); padding: 16px 20px; transform: translateY(-20px); opacity: 0; pointer-events: none; transition: transform .25s ease, opacity .25s ease; }
-  .site-nav.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  /* fechado também fica invisível para o teclado e leitores de ecrã (visibility) */
+  .site-nav { position: fixed; inset: 64px 0 auto 0; background: var(--surface); padding: 16px 20px; transform: translateY(-20px); opacity: 0; visibility: hidden; pointer-events: none; transition: transform .25s ease, opacity .25s ease, visibility 0s linear .25s; }
+  .site-nav.open { transform: translateY(0); opacity: 1; visibility: visible; pointer-events: auto; transition: transform .25s ease, opacity .25s ease, visibility 0s; }
   .site-nav ul { flex-direction: column; }
 }
 
@@ -425,32 +426,7 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
   }
 }
 
-.parceiros-inativo {
-  /* 1. Estrutura (Igual aos outros botões para alinhar bem) */
-  display: inline-flex;
-  height: 36px;
-  align-items: center;
-  padding: 0 14px;
-  border-radius: 999px;
-  font-size: 1rem; 
-  
-  /* 2. Visual "Desligado" */
-  background-color: transparent;   
-  border: 1px solid var(--muted);  
-  color: var(--muted);             
-  opacity: 0.5;                    
-  
-  /* 3. Bloqueio */
-  cursor: not-allowed;             
-  pointer-events: none;            
-  user-select: none;               
-}
 
-/* Ajuste opcional para Dark Mode se necessário */
-body.dark-mode .parceiros-inativo {
-  border-color: var(--dark-border);
-  color: var(--dark-text-muted);
-}
 
 
 /* --- Estilos do Logótipo (CORRIGIDO) --- */
@@ -511,4 +487,51 @@ body.dark-mode .site-nav a.active,
 body.dark-mode .site-nav a.cta {
   color: #000000 !important;
   background-color: var(--primary);
+}
+
+/* --- Acessibilidade --- */
+
+/* Foco visível para quem navega com o teclado */
+:focus-visible { outline: 3px solid #006b52; outline-offset: 2px; }
+body.dark-mode :focus-visible { outline-color: var(--primary); }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Link "Saltar para o conteúdo": só aparece quando recebe foco */
+.skip-link {
+  position: absolute; left: 12px; top: -60px; z-index: 100;
+  background: var(--primary); color: #0d1117; font-weight: 600;
+  padding: 10px 16px; border-radius: 10px; text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+
+/* Botão de idioma: realça o idioma ativo */
+#lang-toggle [data-lang] { opacity: 0.6; }
+#lang-toggle [data-lang].is-active { opacity: 1; font-weight: 700; color: #006b52; }
+body.dark-mode #lang-toggle [data-lang].is-active { color: var(--primary); }
+
+/* Filtros das notícias: botão ativo */
+.news-controls .btn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #0d1117; font-weight: 600; }
+body.dark-mode .news-controls .btn[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #0d1117; }
+
+/* Miniaturas da galeria (botões) */
+.event-thumb { padding: 0; border: 0; background: none; border-radius: 12px; cursor: pointer; display: block; }
+.event-thumb.active img { outline: 3px solid var(--primary); outline-offset: 2px; }
+.event-main[role="button"] { cursor: zoom-in; }
+
+body.dark-mode .link-news { color: var(--primary); }
+
+/* Sem animações para quem pede "reduzir movimento" no sistema */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-on-scroll { opacity: 1; transform: none; }
 }

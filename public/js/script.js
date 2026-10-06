@@ -1,5 +1,9 @@
 import { events } from './events.js';
 import { membros } from './membros.js';
+import {
+  getLang, applyCommonLang, initLangToggle as initCommonLangToggle, initThemeToggle, initMenu,
+  revealObserver as observer, observeReveal, initBackground, initFooterYear, reducedMotion
+} from './common.js';
 
 // --- 0. Carregamento Dinâmico do reCAPTCHA (Solução "Sem Variáveis Mágicas") ---
 async function carregarReCaptcha() {
@@ -12,7 +16,7 @@ async function carregarReCaptcha() {
       const script = document.createElement('script');
       script.src = `https://www.google.com/recaptcha/api.js?render=${SITE_KEY}`;
       document.head.appendChild(script);
-      
+
       // Guarda globalmente para a função enviarPedido usar
       window.VITE_RECAPTCHA_SITE_KEY = SITE_KEY;
       console.log("✅ reCAPTCHA configurado via Servidor.");
@@ -24,50 +28,10 @@ async function carregarReCaptcha() {
 carregarReCaptcha();
 
 // --- 1. Navegação e UI Geral ---
-const menuToggle = document.querySelector('.menu-toggle');
-const siteNav = document.querySelector('.site-nav');
 const navLinks = document.querySelectorAll('.site-nav a');
-
-function toggleMenu() {
-  const open = siteNav.classList.toggle('open');
-  menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-}
-
-if (menuToggle) {
-    menuToggle.addEventListener('click', toggleMenu);
-}
-navLinks.forEach(a => a.addEventListener('click', () => siteNav.classList.remove('open')));
-
-// Dark Mode
-function initThemeToggle() {
-  const themeToggle = document.getElementById('theme-toggle');
-  if (!themeToggle) return;
-
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-  }
-
-  themeToggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
-}
+initMenu();
 initThemeToggle();
-
-// Scroll Animations
-// Começa a revelar ~150px antes de o elemento entrar no ecrã, para o conteúdo já
-// estar visível quando o utilizador lá chega (cartões altos, como os da equipa,
-// só atingiam os 15% visíveis tarde demais). Depois de revelado deixa de ser observado.
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('reveal');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0, rootMargin: '0px 0px 150px 0px' });
-document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+observeReveal();
 
 // --- 2. Internacionalização (i18n) ---
 const i18n = {
@@ -104,6 +68,20 @@ const i18n = {
     'help.desc': 'Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.',
     'help.submit': 'Enviar Pedido',
     'help.sent': 'Pedido Enviado com Sucesso',
+    'help.label.text': 'O seu pedido',
+    'help.label.email': 'O seu email (para lhe respondermos)',
+    'help.placeholder.text': 'Descreva a sua necessidade',
+    'help.placeholder.email': 'ex: nome@gmail.com',
+    'help.privacy': 'Usamos o seu email apenas para responder a este pedido; o pedido é apagado ao fim de 12 meses.',
+    'help.recaptcha': 'Protegido por reCAPTCHA da Google:',
+    'help.recaptcha.privacy': 'Privacidade',
+    'help.recaptcha.terms': 'Termos',
+    'help.msg.empty': 'Por favor, descreva o seu pedido.',
+    'help.msg.email': 'Por favor, indique um email válido.',
+    'help.msg.sending': 'A enviar...',
+    'help.msg.ok': 'Pedido enviado com sucesso! Irá receber a resposta no email.',
+    'help.msg.error': 'Ocorreu um problema.',
+    'help.msg.network': 'Erro de ligação ou de verificação. Tente novamente.',
     'section.contactos.title': 'Entre em Contacto',
     'section.contactos.sub': 'Junte-se à nossa comunidade através do email, redes sociais ou eventos presenciais.',
     'contact.email': 'Email',
@@ -112,12 +90,13 @@ const i18n = {
     'contact.youtube': 'YouTube',
     'contact.website': 'Website Oficial',
     'links.universidade': 'Universidade',
-    'links.parceiros': 'Parceiros',
     'links.eventos': 'Eventos',
     'label.news': 'Notícia',
     'label.upcoming': 'Brevemente',
     'label.tba': 'Data a Anunciar',
     'button.more': 'Saber Mais',
+    'a11y.linkedin': 'LinkedIn de',
+    'a11y.github': 'GitHub de',
     'empty.past': 'Não existem eventos anteriores disponíveis.'
   },
   en: {
@@ -153,6 +132,20 @@ const i18n = {
     'help.desc': 'Need any help or guidance in IT? Talk to us',
     'help.submit': 'Send request',
     'help.sent': 'Request sent',
+    'help.label.text': 'Your request',
+    'help.label.email': 'Your email (so we can reply)',
+    'help.placeholder.text': 'Describe what you need',
+    'help.placeholder.email': 'e.g. name@gmail.com',
+    'help.privacy': 'We only use your email to reply to this request; requests are deleted after 12 months.',
+    'help.recaptcha': 'Protected by Google reCAPTCHA:',
+    'help.recaptcha.privacy': 'Privacy',
+    'help.recaptcha.terms': 'Terms',
+    'help.msg.empty': 'Please describe your request.',
+    'help.msg.email': 'Please enter a valid email.',
+    'help.msg.sending': 'Sending...',
+    'help.msg.ok': 'Request sent! You will receive the reply by email.',
+    'help.msg.error': 'Something went wrong.',
+    'help.msg.network': 'Connection or verification error. Please try again.',
     'section.contactos.title': 'Contact us',
     'section.contactos.sub': 'Email, social media and useful links.',
     'contact.email': 'Email',
@@ -161,28 +154,28 @@ const i18n = {
     'contact.youtube': 'YouTube',
     'contact.website': 'Website',
     'links.universidade': 'University',
-    'links.parceiros': 'Partners',
     'links.eventos': 'Events',
     'label.news': 'News',
     'label.upcoming': 'Upcoming',
     'label.tba': 'Date to be announced',
     'button.more': 'Learn more',
+    'a11y.linkedin': 'LinkedIn of',
+    'a11y.github': 'GitHub of',
     'empty.past': 'No past events available.'
   }
 };
 
-function getLang() { return localStorage.getItem('lang') || 'pt'; }
 function t(key) { const lang = getLang(); return (i18n[lang] && i18n[lang][key]) || (i18n.pt[key] || key); }
-function applyLangToDom() { document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); const v = t(k); if (v) el.textContent = v; }); }
+function applyLangToDom() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.getAttribute('data-i18n')); if (v) el.textContent = v; });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+  applyCommonLang();
+}
 
 function initLangToggle() {
-  const btn = document.getElementById('lang-toggle');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    const next = getLang() === 'pt' ? 'en' : 'pt';
-    localStorage.setItem('lang', next);
+  initCommonLangToggle(() => {
     applyLangToDom();
-    renderHomepage(events);
+    renderNews();
     renderMembros(membros);
   });
 }
@@ -226,23 +219,23 @@ function renderEvents(list) {
   if (!root) return;
   root.innerHTML = '';
   const ordered = sortHomepage(list);
-  
+
   ordered.forEach(ev => {
     const card = document.createElement('article');
     card.className = 'news-card reveal-on-scroll';
-    
+
     const img = document.createElement('img');
     img.className = 'news-cover';
     img.src = ev.cover;
-    img.alt = ev.title;
+    img.alt = '';
     img.loading = 'lazy';
-    
+
     // Correção: Evitar loop infinito no erro de imagem
     img.onerror = function() {
         // Marcamos que já tentamos corrigir para não entrar em loop
         if (this.getAttribute('data-retried')) return;
         this.setAttribute('data-retried', 'true');
-        
+
         if (this.src.endsWith('.jpg')) this.src = this.src.replace('.jpg', '.jpeg');
         else if (this.src.endsWith('.jpeg')) this.src = this.src.replace('.jpeg', '.png');
         else if (this.src.endsWith('.png')) this.src = this.src.replace('.png', '.jpg');
@@ -250,48 +243,48 @@ function renderEvents(list) {
 
     const body = document.createElement('div');
     body.className = 'news-body';
-    
+
     if (ev.type === 'news') {
       const badge = document.createElement('span');
       badge.className = 'badge badge-news badge-overlay';
       badge.textContent = t('label.news');
       card.appendChild(badge);
     }
-    
+
     const now = new Date();
     const isNews = ev.type === 'news';
     const isNoDate = !ev.date || ev.status === 'no_date';
     const isFuture = !isNews && ev.date && new Date(ev.date) > now;
-    
+
     if (!isNews && (isFuture || isNoDate)) {
       const statusBadge = document.createElement('span');
       statusBadge.className = `badge badge-overlay badge-lg ${isFuture ? 'badge-upcoming' : 'badge-tba'}`;
       statusBadge.textContent = isFuture ? t('label.upcoming') : t('label.tba');
       card.appendChild(statusBadge);
     }
-    
+
     const h3 = document.createElement('h3');
     h3.className = 'news-title';
     h3.textContent = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title;
-    
+
     const meta = document.createElement('div');
     meta.className = 'news-meta';
     meta.textContent = getMeta(ev);
-    
+
     const p = document.createElement('p');
     const desc = getLang() === 'en' ? (ev.desc_en || ev.desc) : ev.desc;
     const firstPara = (desc || '').split(/\n\n+/)[0] || desc || '';
     p.textContent = firstPara;
-    
+
     const actions = document.createElement('div');
     actions.className = 'news-actions';
-    
+
     const btn = document.createElement('a');
     btn.href = ev.type === 'news' ? (ev.external || '#') : `/eventos.html?id=${ev.id}`;
     btn.className = ev.type === 'news' ? 'link-news' : 'btn small';
     btn.textContent = t('button.more');
     if (ev.type === 'news') { btn.target = '_blank'; btn.rel = 'noopener'; }
-    
+
     actions.appendChild(btn);
     body.appendChild(h3);
     body.appendChild(meta);
@@ -331,8 +324,8 @@ function getHomepageNews() {
   ];
 }
 
-function renderHomepage(list) { 
-    renderEvents([...list, ...getHomepageNews()]); 
+function renderHomepage(list) {
+    renderEvents([...list, ...getHomepageNews()]);
 }
 
 // --- Quem Somos (membros) ---
@@ -358,12 +351,12 @@ function renderMembros(lista) {
         <p class="muted">${membro.cargo || t('label.member')}</p>
         <div class="social-links" style="margin-top: 12px; display: flex; gap: 15px; justify-content: center;">
           ${membro.linkedin ? `
-          <a href="${membro.linkedin}" target="_blank" rel="noopener" aria-label="LinkedIn" style="color: inherit; font-size: 1.2rem;">
-            <i class="fa-brands fa-linkedin"></i>
+          <a href="${membro.linkedin}" target="_blank" rel="noopener" aria-label="${t('a11y.linkedin')} ${membro.name}" style="color: inherit; font-size: 1.2rem;">
+            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
           </a>` : ''}
           ${membro.github ? `
-          <a href="${membro.github.trim()}" target="_blank" rel="noopener" aria-label="GitHub" style="color: inherit; font-size: 1.2rem;">
-            <i class="fa-brands fa-github"></i>
+          <a href="${membro.github.trim()}" target="_blank" rel="noopener" aria-label="${t('a11y.github')} ${membro.name}" style="color: inherit; font-size: 1.2rem;">
+            <i class="fa-brands fa-github" aria-hidden="true"></i>
           </a>` : ''}
         </div>
       </div>
@@ -373,24 +366,18 @@ function renderMembros(lista) {
   });
 }
 
-// Inicializações
-renderHomepage(events);
-renderMembros(membros);
-applyLangToDom();
-initLangToggle();
-
-// Filtros
+// Filtros: "Todos" / "Anteriores" (eventos e notícias com data já passada)
+let newsFilter = 'all';
 const btnAll = document.getElementById('filter-all');
 const btnPast = document.getElementById('filter-past');
 
-if(btnAll) btnAll.addEventListener('click', () => renderHomepage(events));
-if(btnPast) btnPast.addEventListener('click', () => {
-  const past = events.filter(ev => {
-    if (!ev.date) return false;
-    const d = new Date(ev.date);
-    const now = new Date();
-    return d < now;
-  });
+function renderNews() {
+  btnAll?.setAttribute('aria-pressed', String(newsFilter === 'all'));
+  btnPast?.setAttribute('aria-pressed', String(newsFilter === 'past'));
+  if (newsFilter === 'all') return renderHomepage(events);
+
+  const now = new Date();
+  const past = [...events, ...getHomepageNews()].filter(ev => ev.date && new Date(ev.date) < now);
   const root = document.getElementById('news-list');
   if (!past.length) {
     root.innerHTML = '';
@@ -401,7 +388,17 @@ if(btnPast) btnPast.addEventListener('click', () => {
     return;
   }
   renderEvents(past);
-});
+}
+
+btnAll?.addEventListener('click', () => { newsFilter = 'all'; renderNews(); });
+btnPast?.addEventListener('click', () => { newsFilter = 'past'; renderNews(); });
+
+// Inicializações
+renderNews();
+renderMembros(membros);
+applyLangToDom();
+initLangToggle();
+initFooterYear();
 
 // Spy Scroll (Active Links)
 const sections = ['quem', 'fazemos', 'sobre', 'noticias', 'contactos'];
@@ -411,94 +408,33 @@ const sectionEls = sections.map(id => document.getElementById(id));
 window.addEventListener('scroll', () => {
   const y = window.scrollY + 90;
   let active = '';
-  
+
   sectionEls.forEach((el, i) => {
     // --- CORREÇÃO AQUI: Se o elemento não existir, ignora e segue em frente ---
-    if (!el) return; 
-    
+    if (!el) return;
+
     const top = el.offsetTop;
     // Verifica se o próximo elemento existe antes de tentar ler o topo dele
     const nextEl = sectionEls[i + 1];
     const nextTop = (nextEl) ? nextEl.offsetTop : Number.MAX_VALUE;
-    
+
     if (y >= top && y < nextTop) active = '#' + sections[i];
   });
 
   navLinks.forEach(a => {
     const on = a.getAttribute('href') === active;
     a.classList.toggle('active', on);
-    a.style.fontWeight = on ? '700' : '400';
+    if (on) a.setAttribute('aria-current', 'location');
+    else a.removeAttribute('aria-current');
   });
-});
+}, { passive: true });
 
 // --- 4. Canvas e Efeitos Visuais ---
-function initBackground() {
-  const c = document.getElementById('bg-canvas');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  let w, h;
-  function resize() { w = window.innerWidth; h = window.innerHeight; c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-  resize();
-  window.addEventListener('resize', resize);
-  const nodes = Array.from({ length: 90 }, () => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.8,
-    vy: (Math.random() - 0.5) * 0.8,
-    r: 3 + Math.random() * 2,
-    hue: 180 + Math.random() * 180
-  }));
-  const mouse = { x: w/2, y: h/2, has: false };
-  window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.has = true; });
-  window.addEventListener('mouseleave', () => { mouse.has = false; });
-  function step() {
-    ctx.clearRect(0, 0, w, h);
-    const isDark = document.body.classList.contains('dark-mode');
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
-      if (mouse.has) {
-        const dx = mouse.x - n.x, dy = mouse.y - n.y; const d = Math.hypot(dx, dy);
-        if (d < 160) { n.vx += dx * 0.0002; n.vy += dy * 0.0002; }
-      }
-      n.vx *= 0.996; n.vy *= 0.996;
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < -50 || n.x > w + 50) n.vx *= -1;
-      if (n.y < -50 || n.y > h + 50) n.vy *= -1;
-      ctx.beginPath();
-      if (isDark) {
-        ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
-      } else {
-        ctx.fillStyle = `hsla(${n.hue}, 70%, 35%, 0.6)`;
-      }
-      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j];
-        const dx = a.x - b.x, dy = a.y - b.y; const dist = Math.hypot(dx, dy);
-        if (dist < 140) {
-          const alpha = 0.10 + (140 - dist) / 140 * 0.20;
-          if (isDark) {
-            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-          } else {
-            ctx.strokeStyle = `rgba(0,0,0,${alpha * 0.5})`;
-          }
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(step);
-  }
-  step();
-}
-initBackground();
+initBackground({ followMouse: true });
 
 function initIconConstellations() {
-  if (window.innerWidth <= 880) return;
-  const wrap = document.createElement('div'); wrap.className = 'bg-icons'; document.body.appendChild(wrap);
+  if (window.innerWidth <= 880 || reducedMotion) return;
+  const wrap = document.createElement('div'); wrap.className = 'bg-icons'; wrap.setAttribute('aria-hidden', 'true'); document.body.appendChild(wrap);
   const icons = [
     () => svg('<rect x="8" y="16" width="16" height="16" rx="3" stroke="currentColor" fill="none"/>'),
     () => svg('<polygon points="6,12 12,6 18,12" stroke="currentColor" fill="none"/><polygon points="6,18 12,12 18,18" stroke="currentColor" fill="none"/>'),
@@ -524,30 +460,6 @@ function initIconConstellations() {
 }
 initIconConstellations();
 
-function initMonitorBackground() {
-  const el = document.querySelector('.pc-monitor');
-  if (!el) return;
-  const cands = [
-    '/images/tela_computador.png',
-    '/images/tela_computador.jpg',
-    '/images/tela_computador.jpeg',
-    'images/tela_computador.png',
-    'images/tela_computador.jpg',
-    'images/tela_computador.jpeg'
-  ];
-  let idx = 0;
-  function tryLoad() {
-    if (idx >= cands.length) return;
-    const u = cands[idx++];
-    const t = new Image();
-    t.onload = () => { el.style.backgroundImage = `url('${u}')`; };
-    t.onerror = tryLoad;
-    t.src = u;
-  }
-  tryLoad();
-}
-initMonitorBackground();
-
 function initCounters() {
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
@@ -560,6 +472,7 @@ function initCounters() {
 function animateCount(el) {
   const target = Number(el.getAttribute('data-target')) || 0;
   const suffix = el.getAttribute('data-suffix') || '';
+  if (reducedMotion) { el.textContent = `${target}${suffix}`; return; }
   let start = 0;
   const dur = 1400;
   const t0 = performance.now();
@@ -574,94 +487,80 @@ function animateCount(el) {
 initCounters();
 
 // --- 5. Formulário de Ajuda ---
-
-// Adiciona o listener ao formulário automaticamente quando a página carrega
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('ajuda-form');
-    if (form) {
-        // Remove o 'onclick' do botão HTML se existir, e usa o submit do form
-        const btn = form.querySelector('button');
-        if (btn) btn.removeAttribute('onclick');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Impede o reload da página
-            await enviarPedido();
-        });
-    }
+const ajudaForm = document.getElementById('ajuda-form');
+ajudaForm?.addEventListener('submit', async (e) => {
+  e.preventDefault(); // Impede o reload da página
+  await enviarPedido();
 });
 
 async function enviarPedido() {
-    const texto = document.getElementById('ajuda-texto').value;
-    const email = document.getElementById('ajuda-email').value;
-    const feedbackBox = document.getElementById('form-feedback'); // Selecionar a caixa de mensagem
-    
-    const SITE_KEY = window.VITE_RECAPTCHA_SITE_KEY;
-    
-    // Função auxiliar para mostrar mensagens
-    const mostrarMensagem = (msg, tipo) => {
-        feedbackBox.textContent = msg;
-        feedbackBox.className = `form-feedback ${tipo}`; // Define classe 'success' ou 'error'
-        feedbackBox.style.display = 'block';
-    };
+  const textoEl = document.getElementById('ajuda-texto');
+  const emailEl = document.getElementById('ajuda-email');
+  const texto = textoEl.value;
+  const email = emailEl.value.trim();
+  const feedbackBox = document.getElementById('form-feedback');
+  const SITE_KEY = window.VITE_RECAPTCHA_SITE_KEY;
 
-    // Limpar mensagens anteriores
-    feedbackBox.style.display = 'none';
+  const mostrarMensagem = (msg, tipo) => {
+    feedbackBox.textContent = msg;
+    feedbackBox.className = `form-feedback ${tipo}`; // 'success' ou 'error'
+    feedbackBox.style.display = 'block';
+  };
 
+  feedbackBox.style.display = 'none';
+  textoEl.removeAttribute('aria-invalid');
+  emailEl.removeAttribute('aria-invalid');
 
-    // Validações
-    if (!texto.trim()) return mostrarMensagem('Por favor, descreva o seu pedido.', 'error');
-    if (!email.includes('@')) return mostrarMensagem('Por favor, indique um email válido.', 'error');
-    
-    // Validação Captcha opcional (se quiseres forçar, descomenta a linha abaixo)
-    // if (typeof grecaptcha !== 'undefined' && !captchaToken) return mostrarMensagem('Por favor, complete a verificação "Não sou um robô".', 'error');
+  if (!texto.trim()) {
+    textoEl.setAttribute('aria-invalid', 'true');
+    textoEl.focus();
+    return mostrarMensagem(t('help.msg.empty'), 'error');
+  }
+  if (!emailEl.checkValidity() || !email.includes('@')) {
+    emailEl.setAttribute('aria-invalid', 'true');
+    emailEl.focus();
+    return mostrarMensagem(t('help.msg.email'), 'error');
+  }
 
-    const btn = document.querySelector('#ajuda-form button');
-    const textoOriginal = btn.innerText;
-    btn.innerText = 'A enviar...';
-    btn.disabled = true;
+  const btn = ajudaForm.querySelector('button[type="submit"]');
+  const textoOriginal = btn.innerText;
+  btn.innerText = t('help.msg.sending');
+  btn.disabled = true;
 
-    try {
-        // --- Lógica reCAPTCHA v3 ---
-        const token = await new Promise((resolve) => {
-             // Garante que o grecaptcha está carregado
-             if (typeof grecaptcha === 'undefined') {
-                 console.error('reCAPTCHA não carregado');
-                 resolve(null);
-                 return;
-             }
-             grecaptcha.ready(() => {
-                 grecaptcha.execute(SITE_KEY, { action: 'submit' }).then(resolve);
-             });
-        });
-        
-        if (!token) throw new Error('Falha ao gerar token de segurança.');
+  try {
+    // reCAPTCHA v3 (invisível)
+    const token = await new Promise((resolve) => {
+      if (typeof grecaptcha === 'undefined' || !SITE_KEY) {
+        console.error('reCAPTCHA não carregado');
+        resolve(null);
+        return;
+      }
+      grecaptcha.ready(() => {
+        grecaptcha.execute(SITE_KEY, { action: 'submit' }).then(resolve, () => resolve(null));
+      });
+    });
 
-        const res = await fetch('/api/ajuda', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                text: texto, 
-                email: email, 
-                captcha: token // Envia o token invisível
-            })
-        });
+    if (!token) throw new Error('Falha ao gerar token de segurança.');
 
-        const data = await res.json();
+    const res = await fetch('/api/ajuda', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: texto, email, captcha: token })
+    });
 
-        if (res.ok) {
-            mostrarMensagem('Pedido enviado com sucesso! Irá receber a resposta no email.', 'success');
-            document.getElementById('ajuda-form').reset();
-        } else {
-            mostrarMensagem('Erro: ' + (data.message || 'Ocorreu um problema.'), 'error');
-        }
-    } catch (err) {
-        console.error(err);
-        mostrarMensagem('Erro de conexão ou verificação.', 'error');
-    } finally {
-        btn.innerText = textoOriginal;
-        btn.disabled = false;
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      mostrarMensagem(t('help.msg.ok'), 'success');
+      ajudaForm.reset();
+    } else {
+      mostrarMensagem(`${t('help.msg.error')} ${data.message || ''}`.trim(), 'error');
     }
+  } catch (err) {
+    console.error(err);
+    mostrarMensagem(t('help.msg.network'), 'error');
+  } finally {
+    btn.innerText = textoOriginal;
+    btn.disabled = false;
+  }
 }
-
-// Ano atual no rodapé
-document.querySelectorAll('.ano-atual').forEach(el => { el.textContent = new Date().getFullYear(); });

@@ -12,8 +12,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 3000;
-const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY; 
+const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY;
 const ADMIN_PASS = process.env.ADMIN_PASS || (process.env.NODE_ENV === 'production' ? null : '1234');
 if (!ADMIN_PASS) {
   console.error('❌ ADMIN_PASS não definido: o login do admin fica desativado.');
@@ -30,7 +31,7 @@ const pool = new Pool({
 const runMigrations = async () => {
   try {
     const sqlPath = join(__dirname, 'migrations.sql');
-    
+
     if (fs.existsSync(sqlPath)) {
       const sql = fs.readFileSync(sqlPath, 'utf8');
       await pool.query(sql);
@@ -79,7 +80,7 @@ if (process.env.SMTP_HOST) {
 // O nginx está à frente da app (um proxy): req.ip passa a ser o IP do cliente
 // que o nginx acrescenta ao X-Forwarded-For.
 app.set('trust proxy', 1);
-app.use(express.json());
+app.use(express.json({ limit: '300kb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // --- SESSÃO DO ADMIN ---
@@ -198,7 +199,7 @@ app.get('/api/config', (req, res) => {
 
 // 2. Receber Pedido de Ajuda (Com Email e Captcha)
 app.post('/api/ajuda', async (req, res) => {
-  
+
   try {
     const { text, email, captcha } = req.body;
 
@@ -257,6 +258,20 @@ app.get('/api/pedidos', requireAdmin, async (req, res) => {
   }
 });
 
+// 3b. Apagar um pedido (Admin)
+app.delete('/api/pedidos/:id', requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ message: 'ID inválido.' });
+  try {
+    const result = await pool.query('DELETE FROM pedidos_ajuda WHERE id = $1', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+    res.json({ message: 'Pedido apagado.' });
+  } catch (error) {
+    console.error('Erro ao apagar pedido:', error);
+    res.status(500).json({ error: 'Erro interno.' });
+  }
+});
+
 // 4. Responder a Pedido (COM ENVIO DE EMAIL)
 app.post('/api/responder', requireAdmin, async (req, res) => {
   try {
@@ -265,7 +280,7 @@ app.post('/api/responder', requireAdmin, async (req, res) => {
 
     // PASSO A: Buscar o email e a pergunta original
     const pedidoQuery = await pool.query('SELECT email, texto FROM pedidos_ajuda WHERE id = $1', [id]);
-    
+
     if (pedidoQuery.rowCount === 0) {
         return res.status(404).json({ message: 'Pedido não encontrado.' });
     }
@@ -288,7 +303,7 @@ app.post('/api/responder', requireAdmin, async (req, res) => {
             <div style="padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;">
                 <p>Olá! 👋</p>
                 <p>Obrigado por entrares em contacto connosco.</p>
-                
+
                 <div style="background-color: #f6f8fa; padding: 15px; border-left: 4px solid #00d9a3; margin: 20px 0;">
                     <small style="color: #666; display: block; margin-bottom: 5px;">A tua pergunta:</small>
                     <em style="color: #24292f;">"${escapeHtml(perguntaOriginal).replace(/\n/g, '<br>')}"</em>
@@ -298,7 +313,7 @@ app.post('/api/responder', requireAdmin, async (req, res) => {
                 <p style="font-size: 16px; line-height: 1.6; color: #24292f;">
                     ${escapeHtml(resposta).replace(/\n/g, '<br>')}
                 </p>
-                
+
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
                 <p style="font-size: 12px; color: #888; text-align: center;">
                     Esta é uma mensagem automática do sistema do Núcleo de Engenharia Informática.<br>
@@ -306,7 +321,7 @@ app.post('/api/responder', requireAdmin, async (req, res) => {
                 </p>
             </div>
         </div>
-      `, 
+      `,
     });
 
     console.log(`📧 Email enviado com sucesso para ${emailDestino}`);
@@ -334,7 +349,7 @@ app.post('/api/responder', requireAdmin, async (req, res) => {
   }
 });
 
-    
+
 
 // 5. Perfil Admin (Ler e Atualizar)
 app.get('/api/usuarios', requireAdmin, async (req, res) => {
@@ -349,11 +364,22 @@ app.get('/api/usuarios', requireAdmin, async (req, res) => {
 
 app.put('/api/usuarios', requireAdmin, async (req, res) => {
     try {
-        const { nome, linkedin_url, instagram_url } = req.body;
+        const { nome, linkedin_url, instagram_url, foto_url } = req.body;
+        const isUrl = (v) => !v || (typeof v === 'string' && /^https:\/\/[^\s<>"]+$/.test(v) && v.length <= 500);
+        if (typeof nome !== 'string' || !nome.trim() || nome.length > 255) {
+            return res.status(400).json({ error: 'Nome inválido.' });
+        }
+        if (!isUrl(linkedin_url) || !isUrl(instagram_url)) {
+            return res.status(400).json({ error: 'Os links têm de começar por https://' });
+        }
+        if (foto_url && (typeof foto_url !== 'string' || !/^data:image\/(webp|png|jpeg);base64,/.test(foto_url) || foto_url.length > 250000)) {
+            return res.status(400).json({ error: 'Foto inválida ou demasiado grande.' });
+        }
         // Assume que existe um user com ID 1
         await pool.query(
-            `UPDATE usuarios SET nome=$1, linkedin_url=$2, instagram_url=$3 WHERE id=1`,
-            [nome, linkedin_url, instagram_url]
+            `UPDATE usuarios SET nome=$1, linkedin_url=$2, instagram_url=$3,
+                    foto_url=COALESCE($4, foto_url), updated_at=NOW() WHERE id=1`,
+            [nome.trim(), linkedin_url || null, instagram_url || null, foto_url || null]
         );
         res.json({ message: 'Perfil atualizado' });
     } catch (e) {
@@ -365,25 +391,42 @@ app.put('/api/usuarios', requireAdmin, async (req, res) => {
 // Servir Ficheiros Estáticos (Frontend)
 // Nota: O Docker copia para 'dist', mas localmente pode ser 'public'.
 // O código abaixo tenta servir do 'dist' primeiro.
-app.use(express.static(join(__dirname, 'dist')));
+app.get('/health', (req, res) => res.type('text').send('ok'));
 
-// Fallback para SPA (Single Page Application) ou rotas não encontradas
-app.get('*', (req, res) => {
-  // VERIFICAÇÃO NOVA:
-  // Se o pedido for para uma API ou ficheiro estático (.js, .css, .png) e não existir,
-  // devolvemos Erro 404 em vez de enviarmos o index.html por engano.
-  if (req.url.startsWith('/api/') || req.url.match(/\.(js|css|png|jpg|ico|json)$/)) {
-    return res.status(404).send('Not found');
+// A página de parceiros foi removida (só tinha exemplos); links antigos vão para a homepage
+app.get(['/parceiros', '/parceiros.html'], (req, res) => res.redirect(301, '/'));
+
+app.use(express.static(join(__dirname, 'dist'), { extensions: ['html'] }));
+
+// Tudo o resto não existe: 404 (JSON na API, página 404 no resto)
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'Not found' });
   }
-  
-  // Só devolve o HTML se for navegação real
-  res.sendFile(join(__dirname, 'dist', 'index.html'));
+  res.status(404).sendFile(join(__dirname, 'dist', '404.html'));
 });
+
+// RGPD: os pedidos de ajuda (com email) são apagados ao fim de 12 meses,
+// como indicado no formulário. Corre no arranque e depois uma vez por dia.
+const RETENCAO_PEDIDOS = '12 months';
+const limparPedidosAntigos = async () => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM pedidos_ajuda WHERE data_envio < NOW() - $1::interval`,
+      [RETENCAO_PEDIDOS]
+    );
+    if (result.rowCount > 0) console.log(`🧹 Apagados ${result.rowCount} pedidos com mais de ${RETENCAO_PEDIDOS}.`);
+  } catch (err) {
+    console.error('Erro ao apagar pedidos antigos:', err.message);
+  }
+};
 
 // Em vez de ligar o servidor logo, garantimos que as migrações correm primeiro.
 const startServer = async () => {
   // Executa a verificação/criação das tabelas antes de aceitar conexões
-  await runMigrations(); 
+  await runMigrations();
+  await limparPedidosAntigos();
+  setInterval(limparPedidosAntigos, 24 * 60 * 60 * 1000).unref();
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor autónomo a correr na porta ${PORT}`);

@@ -14,9 +14,9 @@ export default defineConfig({
             input: {
                 index: resolve(__dirname, 'public/index.html'),
                 eventos: resolve(__dirname, 'public/eventos.html'),
-                parceiros: resolve(__dirname, 'public/parceiros.html'),
                 quem: resolve(__dirname, 'public/quem.html'),
-                admin: resolve(__dirname, 'public/admin.html')
+                admin: resolve(__dirname, 'public/admin.html'),
+                notFound: resolve(__dirname, 'public/404.html')
             }
         }
     }

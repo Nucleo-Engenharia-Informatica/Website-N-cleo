@@ -24,10 +24,29 @@
 }
 
 .custom-input:focus {
-    border-color: #00d4ff; /* Cor de destaque */
-    outline: none;
+    border-color: #006b52; /* Cor de destaque */
     background-color: #fff;
 }
+
+/* Labels dos campos */
+.form-label {
+    display: block;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.custom-input[aria-invalid="true"] { border-color: #c62828; }
+
+/* Nota de privacidade por baixo do botão */
+.form-privacy {
+    margin: 16px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+.form-privacy a { color: inherit; }
 
 /* Centralizar o Recaptcha */
 .captcha-container {
@@ -79,13 +98,13 @@ body.dark-mode .custom-input:focus {
 
 .form-feedback.success {
     background-color: rgba(63, 185, 80, 0.2);
-    color: #3fb950;
+    color: #1a7f37;
     border: 1px solid #3fb950;
 }
 
 .form-feedback.error {
     background-color: rgba(248, 81, 73, 0.2);
-    color: #f85149;
+    color: #b42318;
     border: 1px solid #f85149;
 }
 
@@ -119,3 +138,7 @@ body.dark-mode .g-recaptcha > div {
 .grecaptcha-badge { 
     visibility: hidden !important;
 }
+
+/* No modo escuro as cores mais claras têm melhor contraste */
+body.dark-mode .form-feedback.success { color: #3fb950; }
+body.dark-mode .form-feedback.error { color: #f85149; }

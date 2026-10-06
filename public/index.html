@@ -4,6 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Núcleo de Engenharia Informática</title>
+    <meta name="description" content="Núcleo de Engenharia Informática da Universidade Fernando Pessoa: workshops, hackathons, talks e apoio à comunidade tecnológica." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Núcleo de Engenharia Informática — UFP" />
+    <meta property="og:title" content="Núcleo de Engenharia Informática — UFP" />
+    <meta property="og:description" content="Núcleo de Engenharia Informática da Universidade Fernando Pessoa: workshops, hackathons, talks e apoio à comunidade tecnológica." />
+    <meta property="og:url" content="https://ni.ufp.pt/" />
+    <meta property="og:image" content="https://ni.ufp.pt/NIUFP-Logo.png" />
+    <meta property="og:locale" content="pt_PT" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -15,27 +23,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/styles.css" />
-    <link rel="stylesheet" href="css/form.css">
-    </head>
+    <link rel="stylesheet" href="/css/form.css" />
+  </head>
   <body>
+    <script>
+      // Aplica o tema antes de desenhar a página (evita piscar). Sem escolha guardada, segue o sistema.
+      try { var t = localStorage.getItem('theme'); if (t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark-mode'); } catch (e) {}
+    </script>
+    <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
     <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
     <header class="site-header">
       <div class="container nav-container">
         <a class="brand" href="#top">
-          <img src="NIUFP-Logo.png" alt="Núcleo EI" class="nav-logo light-only">
-          <img src="NIUFP-Logo.png" alt="Núcleo EI" class="nav-logo dark-only">
+          <img src="NIUFP-Logo.png" alt="Núcleo EI — início" class="nav-logo">
         </a>
-        <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">
+        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="site-nav">
           <span></span><span></span><span></span>
         </button>
-        <nav class="site-nav" aria-label="Principal">
+        <nav class="site-nav" id="site-nav" aria-label="Principal">
           <ul>
             <li><a href="#quem" data-i18n="nav.quem">Quem Somos</a></li>
             <li><a href="#fazemos" data-i18n="nav.fazemos">O que Fazemos</a></li>
             <li><a href="#sobre" data-i18n="nav.sobre">Sobre o Curso</a></li>
             <li><a href="#noticias" data-i18n="nav.noticias">Notícias e Eventos</a></li>
             <li><a href="#contactos" class="cta" data-i18n="nav.contactos">Contactos</a></li>
-            <li><button id="theme-toggle" class="btn small icon-btn" aria-label="Toggle dark mode">
+            <li><button id="theme-toggle" type="button" class="btn small icon-btn" aria-label="Modo escuro" aria-pressed="false">
               <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
               </svg>
@@ -43,16 +55,16 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
               </svg>
             </button></li>
-            <li><button id="lang-toggle" class="btn small">PT/EN</button></li>
+            <li><button id="lang-toggle" type="button" class="btn small" aria-label="Idioma: Português. Mudar para inglês"><span data-lang="pt" class="is-active">PT</span><span aria-hidden="true">/</span><span data-lang="en">EN</span></button></li>
           </ul>
         </nav>
       </div>
     </header>
 
-    <main id="top">
+    <main id="conteudo">
       <section class="hero hero-team">
         <div class="container hero-center">
-          <h1 class="hero-title" data-i18n="hero.title">Nucleo De Engenharia Informática da Universidade Fernando Pessoa</h1>
+          <h1 class="hero-title" data-i18n="hero.title">Núcleo de Engenharia Informática da Universidade Fernando Pessoa</h1>
         </div>
         <div class="bg-animated"></div>
       </section>
@@ -126,9 +138,9 @@
         <div class="container">
           <h2 class="section-title reveal-on-scroll" data-i18n="section.noticias.title">Notícias</h2>
           <p class="section-subtitle reveal-on-scroll" data-i18n="section.noticias.sub">Próximos eventos e novidades.</p>
-          <div class="news-controls reveal-on-scroll">
-            <button class="btn small" id="filter-all" data-i18n="filter.all">Tudo</button>
-            <button class="btn small" id="filter-past" data-i18n="filter.past">Passados</button>
+          <div class="news-controls reveal-on-scroll" role="group" aria-label="Filtrar notícias">
+            <button type="button" class="btn small" id="filter-all" data-i18n="filter.all" aria-pressed="true">Todos</button>
+            <button type="button" class="btn small" id="filter-past" data-i18n="filter.past" aria-pressed="false">Anteriores</button>
           </div>
           <div class="news-list" id="news-list"></div>
         </div>
@@ -137,47 +149,52 @@
       <section id="contactos" class="section alt">
         <div class="container">
           <div class="reveal-on-scroll" style="text-align: center; margin-bottom: 20px;">
-            <h3 class="section-title" data-i18n="help.title" >Apoio à Comunidade Tecnológica</h3>
-
-
-            <p class="section-subtitle" data-i18n="help.desc" >Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.</p>
+            <h2 class="section-title" data-i18n="help.title">Apoio à Comunidade Tecnológica</h2>
+            <p class="section-subtitle" data-i18n="help.desc">Precisa de ajuda ou orientação na área da informática? Fale connosco e ajudamos a encontrar a solução ideal.</p>
           </div>
-            <form id="ajuda-form" class="form-card reveal-on-scroll">
-              <textarea id="ajuda-texto" name="ajuda-texto" class="custom-input" name="ajuda-texto" rows="5"  placeholder="Descreva a sua necessidade " required></textarea>
-              <input type="email" id="ajuda-email"  class="custom-input"   placeholder="O seu email para resposta (ex: user@gmail.com)" required 
-                style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; background: rgba(255,255,255,0.05); color: inherit;">
-                <div id="form-feedback" class="form-feedback"></div> 
-              <button type="submit"  class="btn primary" data-i18n="help.submit">Enviar pedido</button>
-            </form>
+          <form id="ajuda-form" class="form-card reveal-on-scroll" novalidate>
+            <label for="ajuda-texto" class="form-label" data-i18n="help.label.text">O seu pedido</label>
+            <textarea id="ajuda-texto" name="texto" class="custom-input" rows="5" maxlength="5000" placeholder="Descreva a sua necessidade" data-i18n-placeholder="help.placeholder.text" required></textarea>
+            <label for="ajuda-email" class="form-label" data-i18n="help.label.email">O seu email (para lhe respondermos)</label>
+            <input type="email" id="ajuda-email" name="email" class="custom-input" maxlength="254" autocomplete="email" placeholder="ex: nome@gmail.com" data-i18n-placeholder="help.placeholder.email" required>
+            <div id="form-feedback" class="form-feedback" role="status" aria-live="polite"></div>
+            <button type="submit" class="btn primary" data-i18n="help.submit">Enviar pedido</button>
+            <p class="form-privacy">
+              <span data-i18n="help.privacy">Usamos o seu email apenas para responder a este pedido; o pedido é apagado ao fim de 12 meses.</span>
+              <span data-i18n="help.recaptcha">Protegido por reCAPTCHA da Google:</span>
+              <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" data-i18n="help.recaptcha.privacy">Privacidade</a> ·
+              <a href="https://policies.google.com/terms" target="_blank" rel="noopener" data-i18n="help.recaptcha.terms">Termos</a>
+            </p>
+          </form>
           <h2 class="section-title reveal-on-scroll" data-i18n="section.contactos.title">Contacte-nos</h2>
           <p class="section-subtitle reveal-on-scroll" data-i18n="section.contactos.sub">Email, redes sociais e links úteis.</p>
           <div class="contact-grid">
             <a class="contact-card reveal-on-scroll" href="mailto:aafp.engenhariainformatica@ufp.edu.pt">
-              <span class="contact-icon">
+              <span class="contact-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M2 6h20v12H2z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2 6l10 7 10-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
               </span>
               <span data-i18n="contact.email">Email</span>
             </a>
             <a class="contact-card reveal-on-scroll" href="https://www.instagram.com/universidadefernandopessoa/" target="_blank" rel="noopener">
-              <span class="contact-icon">
+              <span class="contact-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.5" /></svg>
               </span>
               <span data-i18n="contact.instagram">Instagram</span>
             </a>
             <a class="contact-card reveal-on-scroll" href="https://pt.linkedin.com/school/universidade-fernando-pessoa/" target="_blank" rel="noopener">
-              <span class="contact-icon">
+              <span class="contact-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="3" y="3" width="6" height="18" fill="currentColor"/><rect x="10" y="10" width="11" height="11" fill="currentColor"/><circle cx="6" cy="6" r="3" fill="currentColor"/></svg>
               </span>
               <span data-i18n="contact.linkedin">LinkedIn</span>
             </a>
             <a class="contact-card reveal-on-scroll" href="https://www.youtube.com/@UniversidadeFernandoPessoaUFP" target="_blank" rel="noopener">
-              <span class="contact-icon">
+              <span class="contact-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor"/><polygon points="10,9 16,12 10,15" fill="#fff"/></svg>
               </span>
               <span data-i18n="contact.youtube">YouTube</span>
             </a>
             <a class="contact-card reveal-on-scroll" href="https://informatica.ufp.pt/" target="_blank" rel="noopener">
-              <span class="contact-icon">🌐</span>
+              <span class="contact-icon" aria-hidden="true">🌐</span>
               <span data-i18n="contact.website">Website</span>
             </a>
           </div>
@@ -185,7 +202,6 @@
           <div class="links-uteis reveal-on-scroll">
             <a href="https://www.ufp.pt/" target="_blank" rel="noopener" class="link-pill" data-i18n="links.universidade">Universidade</a>
             <a href="./eventos.html" class="link-pill" data-i18n="links.eventos">Eventos</a>
-            <a href="javascript:void(0)" class="link-pill" data-i18n="links.parceiros" style="opacity: 0.5; cursor: not-allowed; pointer-events: none; filter: grayscale(1);">Parceiros</a>
           </div>
         </div>
       </section>
@@ -198,6 +214,6 @@
       </div>
     </footer>
 
-    <script type="module" src="/js/script.js"></script> 
+    <script type="module" src="/js/script.js"></script>
   </body>
 </html>

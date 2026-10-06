@@ -1,4 +1,8 @@
 import { events } from './events.js';
+import {
+  getLang, applyCommonLang, initLangToggle as initCommonLangToggle, initThemeToggle, initMenu,
+  revealObserver as observer, observeReveal, initBackground, initFooterYear, reducedMotion
+} from './common.js';
 
 const i18n = {
   pt: {
@@ -12,7 +16,16 @@ const i18n = {
     'page.evento.others.subtitle': 'Descubra mais atividades e iniciativas do núcleo.',
     'evento.back': 'Voltar às notícias',
     'label.tba': 'Data a Anunciar',
-    'label.upcoming': 'Próximamente'
+    'label.upcoming': 'Brevemente',
+    'evento.details': 'Ver detalhes',
+    'evento.notfound': 'Evento não encontrado',
+    'evento.notfound.desc': 'O evento que procura não existe ou foi removido.',
+    'lightbox.label': 'Galeria de imagens',
+    'lightbox.open': 'Ampliar imagem',
+    'lightbox.prev': 'Imagem anterior',
+    'lightbox.next': 'Imagem seguinte',
+    'lightbox.close': 'Fechar',
+    'lightbox.thumb': 'Mostrar imagem'
   },
   en: {
     'nav.quem': 'Who We Are',
@@ -25,40 +38,28 @@ const i18n = {
     'page.evento.others.subtitle': 'Discover more activities and initiatives from the nucleus.',
     'evento.back': 'Back to news',
     'label.tba': 'Date to be Announced',
-    'label.upcoming': 'Upcoming'
+    'label.upcoming': 'Upcoming',
+    'evento.details': 'View details',
+    'evento.notfound': 'Event not found',
+    'evento.notfound.desc': 'The event you are looking for does not exist or was removed.',
+    'lightbox.label': 'Image gallery',
+    'lightbox.open': 'Enlarge image',
+    'lightbox.prev': 'Previous image',
+    'lightbox.next': 'Next image',
+    'lightbox.close': 'Close',
+    'lightbox.thumb': 'Show image'
   }
 };
-function getLang() { return localStorage.getItem('lang') || 'pt'; }
 function t(k) { const lang = getLang(); return (i18n[lang] && i18n[lang][k]) || (i18n.pt[k] || k); }
-function applyLangToDom() { document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); const v = t(k); if (v) el.textContent = v; }); }
-function initLangToggle() { const btn = document.getElementById('lang-toggle'); if (!btn) return; btn.addEventListener('click', () => { const next = getLang() === 'pt' ? 'en' : 'pt'; localStorage.setItem('lang', next); applyLangToDom(); location.reload(); }); }
-
-const menuToggle = document.querySelector('.menu-toggle');
-const siteNav = document.querySelector('.site-nav');
-menuToggle.addEventListener('click', () => {
-  const open = siteNav.classList.toggle('open');
-  menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-});
-
-// Dark Mode Toggle
-function initThemeToggle() {
-  const themeToggle = document.getElementById('theme-toggle');
-  if (!themeToggle) return;
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-  }
-  themeToggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
+function applyLangToDom() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.getAttribute('data-i18n')); if (v) el.textContent = v; });
+  applyCommonLang();
 }
-initThemeToggle();
+function initLangToggle() { initCommonLangToggle(() => location.reload()); }
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
-}, { threshold: 0.15 });
-document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+initMenu();
+initThemeToggle();
+observeReveal();
 
 function sortByDateAsc(list) { return [...list].sort((a, b) => new Date(a.date) - new Date(b.date)); }
 function formatDate(dateStr) { if (!dateStr) return t('label.tba'); const d = new Date(dateStr); const locale = getLang() === 'pt' ? 'pt-PT' : 'en-GB'; return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' }); }
@@ -70,7 +71,7 @@ function renderAgenda(list, selectedId) {
   sortByDateAsc(list.filter(e => e.id !== selectedId)).forEach(ev => {
     const card = document.createElement('article');
     card.className = 'news-card reveal-on-scroll';
-    const img = document.createElement('img'); img.className = 'news-cover'; img.src = ev.cover; img.alt = ev.title; img.loading = 'lazy';
+    const img = document.createElement('img'); img.className = 'news-cover'; img.src = ev.cover; img.alt = ''; img.loading = 'lazy';
     const cands = [];
     const base = ev.cover || '';
     if (base) {
@@ -93,7 +94,7 @@ function renderAgenda(list, selectedId) {
     const meta = document.createElement('div'); meta.className = 'news-meta'; meta.textContent = `${formatDate(ev.date)} · ${getLang() === 'en' ? (ev.location_en || ev.location) : ev.location}`;
     const p = document.createElement('p'); p.textContent = getLang() === 'en' ? (ev.desc_en || ev.desc) : ev.desc;
     const actions = document.createElement('div'); actions.className = 'news-actions';
-    const btn = document.createElement('a'); btn.href = `?id=${ev.id}`; btn.className = 'btn small'; btn.textContent = 'Ver detalhes';
+    const btn = document.createElement('a'); btn.href = `?id=${ev.id}`; btn.className = 'btn small'; btn.textContent = t('evento.details');
     actions.appendChild(btn);
     body.appendChild(h3); body.appendChild(meta); body.appendChild(p); body.appendChild(actions);
     card.appendChild(img); card.appendChild(body);
@@ -114,11 +115,23 @@ function renderAgenda(list, selectedId) {
 function renderDetail(ev) {
   const root = document.getElementById('evento-detalhe');
   root.innerHTML = '';
-  if (!ev) { return; }
+  if (!ev) {
+    if (!getIdFromQuery()) return;
+    // id inexistente: em vez de uma página vazia, explica e dá o caminho de volta
+    const box = document.createElement('div'); box.className = 'card';
+    const body = document.createElement('div'); body.className = 'news-body';
+    const h1 = document.createElement('h1'); h1.className = 'section-title'; h1.textContent = t('evento.notfound');
+    const p = document.createElement('p'); p.textContent = t('evento.notfound.desc');
+    const back = document.createElement('a'); back.href = './index.html#noticias'; back.className = 'btn small'; back.textContent = t('evento.back');
+    body.append(h1, p, back); box.appendChild(body); root.appendChild(box);
+    return;
+  }
+  const evTitle = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title;
+  document.title = `${evTitle} — Núcleo de Engenharia Informática`;
   const wrap = document.createElement('div');
   wrap.className = 'card';
   const body = document.createElement('div'); body.className = 'news-body';
-  const h2 = document.createElement('h2'); h2.className = 'section-title'; h2.textContent = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title;
+  const h2 = document.createElement('h1'); h2.className = 'section-title'; h2.textContent = evTitle;
   const meta = document.createElement('div'); meta.className = 'news-meta'; meta.textContent = getMeta(ev);
 
   /* let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i);
@@ -131,7 +144,8 @@ function renderDetail(ev) {
   let allImgs = [ev.cover, ...(Array.isArray(ev.images) ? ev.images : [])].filter((v, i, a) => a.indexOf(v) === i && v);
   let currentIdx = 0;
 
-  const mainImg = document.createElement('img'); mainImg.className = 'event-main'; mainImg.src = allImgs[0]; mainImg.alt = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title; mainImg.loading = 'lazy';
+  const mainImg = document.createElement('img'); mainImg.className = 'event-main'; mainImg.src = allImgs[0]; mainImg.alt = evTitle; mainImg.loading = 'lazy';
+  mainImg.tabIndex = 0; mainImg.setAttribute('role', 'button'); mainImg.setAttribute('aria-label', `${t('lightbox.open')}: ${evTitle}`);
   mainImg.onerror = () => { const s = mainImg.src; if (s.endsWith('.jpg')) mainImg.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) mainImg.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) mainImg.src = s.replace('.png', '.jpg'); };
   wrap.appendChild(mainImg);
 
@@ -141,45 +155,55 @@ function renderDetail(ev) {
     currentIdx = idx;
     mainImg.src = allImgs[idx];
     Array.from(thumbs.children).forEach((c, i) => {
-      if (i === idx) c.classList.add('active');
-      else c.classList.remove('active');
+      c.classList.toggle('active', i === idx);
+      c.setAttribute('aria-pressed', String(i === idx));
     });
   }
 
   allImgs.forEach((src, idx) => {
-    const t = document.createElement('img'); t.src = src; t.alt = getLang() === 'en' ? (ev.title_en || ev.title) : ev.title; t.loading = 'lazy';
-    t.onerror = () => { const s = t.src; if (s.endsWith('.jpg')) t.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) t.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) t.src = s.replace('.png', '.jpg'); };
-    if (idx === 0) t.classList.add('active');
-    t.addEventListener('click', () => updateMainImage(idx));
-    thumbs.appendChild(t);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'event-thumb';
+    b.setAttribute('aria-label', `${t('lightbox.thumb')} ${idx + 1} / ${allImgs.length}`);
+    b.setAttribute('aria-pressed', String(idx === 0));
+    const t2 = document.createElement('img'); t2.src = src; t2.alt = ''; t2.loading = 'lazy';
+    t2.onerror = () => { const s = t2.src; if (s.endsWith('.jpg')) t2.src = s.replace('.jpg', '.jpeg'); else if (s.endsWith('.jpeg')) t2.src = s.replace('.jpeg', '.png'); else if (s.endsWith('.png')) t2.src = s.replace('.png', '.jpg'); };
+    if (idx === 0) b.classList.add('active');
+    b.appendChild(t2);
+    b.addEventListener('click', () => { stopCarousel(true); updateMainImage(idx); });
+    thumbs.appendChild(b);
   });
 
-  // Auto-play carousel if more than 1 image
+  // Carrossel automático (não roda com "reduzir movimento"; pausa com rato ou foco;
+  // pára de vez quando o utilizador escolhe uma imagem)
   let carouselInterval = null;
-  if (allImgs.length > 1) {
-    carouselInterval = setInterval(() => {
-      const nextIdx = (currentIdx + 1) % allImgs.length;
-      updateMainImage(nextIdx);
-    }, 4000);
-
-    // Pause on hover
-    mainImg.addEventListener('mouseenter', () => clearInterval(carouselInterval));
-    mainImg.addEventListener('mouseleave', () => {
-      if (allImgs.length > 1) {
-        carouselInterval = setInterval(() => {
-          const nextIdx = (currentIdx + 1) % allImgs.length;
-          updateMainImage(nextIdx);
-        }, 4000);
-      }
-    });
+  let carouselStopped = reducedMotion || allImgs.length < 2;
+  function startCarousel() {
+    if (carouselStopped || carouselInterval) return;
+    carouselInterval = setInterval(() => updateMainImage((currentIdx + 1) % allImgs.length), 4000);
   }
+  function stopCarousel(forever = false) {
+    clearInterval(carouselInterval);
+    carouselInterval = null;
+    if (forever) carouselStopped = true;
+  }
+  startCarousel();
+  wrap.addEventListener('mouseenter', () => stopCarousel());
+  wrap.addEventListener('mouseleave', startCarousel);
+  wrap.addEventListener('focusin', () => stopCarousel());
+  wrap.addEventListener('focusout', startCarousel);
 
   // Lightbox with navigation
   const lb = document.createElement('div'); lb.className = 'lightbox';
-  const lbImg = document.createElement('img');
-  const prevBtn = document.createElement('button'); prevBtn.className = 'lightbox-nav lightbox-prev'; prevBtn.innerHTML = '‹';
-  const nextBtn = document.createElement('button'); nextBtn.className = 'lightbox-nav lightbox-next'; nextBtn.innerHTML = '›';
-  const closeBtn = document.createElement('button'); closeBtn.className = 'lightbox-close'; closeBtn.innerHTML = '×';
+  lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', t('lightbox.label'));
+  const lbImg = document.createElement('img'); lbImg.alt = evTitle;
+  const mkBtn = (cls, text, label) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = text; b.setAttribute('aria-label', label); return b;
+  };
+  const prevBtn = mkBtn('lightbox-nav lightbox-prev', '‹', t('lightbox.prev'));
+  const nextBtn = mkBtn('lightbox-nav lightbox-next', '›', t('lightbox.next'));
+  const closeBtn = mkBtn('lightbox-close', '×', t('lightbox.close'));
+  if (allImgs.length < 2) { prevBtn.hidden = true; nextBtn.hidden = true; }
 
   lb.appendChild(lbImg);
   lb.appendChild(prevBtn);
@@ -194,11 +218,14 @@ function renderDetail(ev) {
     lbImg.src = allImgs[idx];
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
+    stopCarousel();
+    closeBtn.focus();
   }
 
   function closeLightbox() {
     lb.classList.remove('open');
     document.body.style.overflow = '';
+    mainImg.focus();
   }
 
   function showPrevImage() {
@@ -212,6 +239,9 @@ function renderDetail(ev) {
   }
 
   mainImg.addEventListener('click', () => openLightbox(currentIdx));
+  mainImg.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(currentIdx); }
+  });
   closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
   lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
   prevBtn.addEventListener('click', (e) => { e.stopPropagation(); showPrevImage(); });
@@ -223,6 +253,13 @@ function renderDetail(ev) {
     if (e.key === 'ArrowLeft') showPrevImage();
     else if (e.key === 'ArrowRight') showNextImage();
     else if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'Tab') {
+      // mantém o foco dentro do lightbox
+      const items = [prevBtn, nextBtn, closeBtn].filter(b => !b.hidden);
+      const i = items.indexOf(document.activeElement);
+      e.preventDefault();
+      items[(i + (e.shiftKey ? -1 : 1) + items.length) % items.length].focus();
+    }
   });
 
   body.appendChild(h2);
@@ -236,20 +273,6 @@ function renderDetail(ev) {
   body.appendChild(actions);
   wrap.appendChild(body);
   root.appendChild(wrap);
-
-  // Click outside to go back
-  setTimeout(() => {
-    const clickOutsideHandler = (e) => {
-      if (!wrap.contains(e.target) && !e.target.closest('.lightbox')) {
-        back.click();
-      }
-    };
-    document.addEventListener('click', clickOutsideHandler);
-    // Store handler to remove later if needed
-    wrap._clickOutsideHandler = clickOutsideHandler;
-  }, 100);
-
-  applyLangToDom(); initLangToggle();
 }
 
 function getIdFromQuery() { return new URLSearchParams(window.location.search).get('id'); }
@@ -259,65 +282,11 @@ function init() {
   const ev = events.find(e => e.id === id);
   renderDetail(ev);
   renderAgenda(events, id);
+  applyLangToDom();
+  initLangToggle();
+  initFooterYear();
 }
 
 init();
 
-function initBackground() {
-  const c = document.getElementById('bg-canvas');
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const dpr = Math.max(1, window.devicePixelRatio || 1);
-  let w, h;
-  function resize() { w = window.innerWidth; h = window.innerHeight; c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-  resize();
-  window.addEventListener('resize', resize);
-  const nodes = Array.from({ length: 90 }, () => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.8,
-    vy: (Math.random() - 0.5) * 0.8,
-    r: 3 + Math.random() * 2,
-    hue: 180 + Math.random() * 180
-  }));
-  function step() {
-    ctx.clearRect(0, 0, w, h);
-    const isDark = document.body.classList.contains('dark-mode');
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < -50 || n.x > w + 50) n.vx *= -1;
-      if (n.y < -50 || n.y > h + 50) n.vy *= -1;
-      ctx.beginPath();
-      if (isDark) {
-        ctx.fillStyle = `hsla(${n.hue}, 90%, 65%, 0.95)`;
-      } else {
-        ctx.fillStyle = `hsla(${n.hue}, 70%, 35%, 0.6)`;
-      }
-      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j];
-        const dx = a.x - b.x, dy = a.y - b.y; const dist = Math.hypot(dx, dy);
-        if (dist < 140) {
-          const alpha = 0.10 + (140 - dist) / 140 * 0.20;
-          if (isDark) {
-            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-          } else {
-            ctx.strokeStyle = `rgba(0,0,0,${alpha * 0.5})`;
-          }
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(step);
-  }
-  step();
-}
-
 initBackground();
-
-// Ano atual no rodapé
-document.querySelectorAll('.ano-atual').forEach(el => { el.textContent = new Date().getFullYear(); });

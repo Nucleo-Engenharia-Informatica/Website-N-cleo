@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Dashboard — Núcleo EI</title>
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -17,6 +18,7 @@
         
         /* Forçar layout Admin a usar variáveis Dark Mode por defeito */
         body.admin-page {
+            --muted: #8b949e; /* contraste suficiente sobre o fundo escuro */
             background: var(--dark-bg);
             color: var(--dark-text);
             display: flex;
@@ -249,8 +251,8 @@
             <h2 class="section-title">Perfil do Admin</h2>
             <div class="profile-container">
                 <div class="profile-pic-wrapper">
-                    <img id="profile-img-preview" class="profile-pic" src="" alt="Foto">
-                    <input type="file" id="upload-photo" hidden accept="image/*">
+                    <img id="profile-img-preview" class="profile-pic" src="/favicon-32x32.png" alt="Foto de perfil">
+                    <input type="file" id="upload-photo" hidden accept="image/*" aria-label="Escolher foto de perfil">
                 </div>
                 <button onclick="document.getElementById('upload-photo').click()" class="btn small" style="margin-bottom: 1rem;">Alterar Foto</button>
                 
@@ -263,16 +265,16 @@
 
                 <div style="display: grid; gap: 12px; text-align: left; margin-top: 1rem;">
                     <div>
-                        <label>NOME PÚBLICO</label>
+                        <label for="perfil-nome">NOME PÚBLICO</label>
                         <input type="text" id="perfil-nome" class="input-dark" placeholder="Nome">
                     </div>
                     <div>
-                        <label>LINK INSTAGRAM</label>
-                        <input type="text" id="perfil-insta" class="input-dark" placeholder="https://instagram.com/...">
+                        <label for="perfil-insta">LINK INSTAGRAM</label>
+                        <input type="url" id="perfil-insta" class="input-dark" placeholder="https://instagram.com/...">
                     </div>
                     <div>
-                        <label>LINK LINKEDIN</label>
-                        <input type="text" id="perfil-linkedin" class="input-dark" placeholder="https://linkedin.com/in/...">
+                        <label for="perfil-linkedin">LINK LINKEDIN</label>
+                        <input type="url" id="perfil-linkedin" class="input-dark" placeholder="https://linkedin.com/in/...">
                     </div>
                     
                     <button onclick="saveProfile()" class="btn primary" style="margin-top:1rem; width: 100%;">Guardar Alterações</button>

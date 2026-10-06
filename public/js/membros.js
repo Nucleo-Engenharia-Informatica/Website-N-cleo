@@ -55,7 +55,7 @@ export const membros = [
     cover: '/images/joao_reis.webp',
     fallback: '/images/joao_reis.jpeg',
     github: 'https://github.com/joaoreis2121',
-    linkedin: 'http://linkedin.com/in/joão-reis-50549a38a'
+    linkedin: 'https://www.linkedin.com/in/joão-reis-50549a38a'
   }, 
   {
     id: 'membro-9',
@@ -109,8 +109,8 @@ export const membros = [
     id: 'membro-16',
     name: 'Dione Arantes',
     cover: '/images/Dione Arantes.webp',
-    fallback: '/images/Dioen Arantes.jpeg',
+    fallback: '/images/Dione Arantes.jpeg',
     github: 'https://github.com/EngArantes',
-    linkedin:'https://www.linkedin.com/in/dione-amaral-arantes-830323117' 
+    linkedin: 'https://www.linkedin.com/in/dione-a-830323117/'
   }
 ];
