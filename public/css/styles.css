@@ -175,9 +175,12 @@ body.dark-mode .site-footer {
 body.dark-mode .menu-toggle span {
   background: var(--dark-text);
 }
-body.dark-mode .site-nav {
-  background: rgba(22,27,34,0.98);
-  border-bottom: 1px solid var(--dark-border);
+/* Só no menu móvel (dropdown); no desktop a nav fica dentro do header */
+@media (max-width: 880px) {
+  body.dark-mode .site-nav {
+    background: rgba(22,27,34,0.98);
+    border-bottom: 1px solid var(--dark-border);
+  }
 }
 
 .bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.4; mix-blend-mode: multiply; }
@@ -298,6 +301,7 @@ body.dark-mode #theme-toggle .moon-icon { display: none; }
 .ajuda-form textarea { width: 100%; min-height: 100px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); resize: vertical; font: inherit; }
 
 #contactos .help-block { text-align: center; }
+#contactos .form-card { margin-bottom: 64px; }
 #sobre .section-title, #sobre .section-subtitle, #sobre p { text-align: center; }
 #sobre .section-subtitle { font-size: 18px; line-height: 1.9; font-weight: 700; max-width: 1000px; margin: 0 auto; }
 .stat-card { text-align: center; }
