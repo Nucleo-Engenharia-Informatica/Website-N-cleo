@@ -56,11 +56,17 @@ function initThemeToggle() {
 initThemeToggle();
 
 // Scroll Animations
+// Começa a revelar ~150px antes de o elemento entrar no ecrã, para o conteúdo já
+// estar visível quando o utilizador lá chega (cartões altos, como os da equipa,
+// só atingiam os 15% visíveis tarde demais). Depois de revelado deixa de ser observado.
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {
-    if (e.isIntersecting) e.target.classList.add('reveal');
+    if (e.isIntersecting) {
+      e.target.classList.add('reveal');
+      observer.unobserve(e.target);
+    }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0, rootMargin: '0px 0px 150px 0px' });
 document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
 
 // --- 2. Internacionalização (i18n) ---
@@ -343,6 +349,7 @@ function renderMembros(lista) {
         src="${membro.cover}"
         alt="${membro.name}"
         loading="lazy"
+        decoding="async"
         style="width: 100%; aspect-ratio: 1/1; object-fit: cover;"
         onerror="this.onerror=null; this.src='${membro.fallback || membro.cover.replace('.webp', '.jpeg')}';"
       >
