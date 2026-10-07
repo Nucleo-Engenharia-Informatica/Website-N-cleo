@@ -351,7 +351,7 @@ function renderMembros(lista) {
     card.innerHTML = `
       <img
         src="${membro.cover}"
-        ${membro.cover.endsWith('.webp') ? `srcset="${membro.cover.replace(/\.webp$/, '-480.webp')} 480w, ${membro.cover} 800w" sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 300px"` : ''}
+        ${membro.cover.endsWith('.webp') ? `srcset="${encodeURI(membro.cover.replace(/\.webp$/, '-480.webp'))} 480w, ${encodeURI(membro.cover)} 800w" sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 300px"` : ''}
         alt="${membro.name}"
         width="800" height="800"
         loading="lazy"
